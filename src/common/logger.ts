@@ -3,12 +3,12 @@ import { createLogger, format, transports } from "winston";
 export const logger = createLogger({
   format: format.combine(
     format.timestamp({
-      format: "YYYY-MM-DD HH:mm:ss"
+      format: "YYYY-MM-DD HH:mm:ss",
     }),
     format.errors({ stack: true }),
     format.simple()
   ),
-  defaultMeta: { service: "customer-service" },
+  defaultMeta: { service: "warehouse-service" },
   transports: [
     //
     // - Write to all logs with level `info` and below to `quick-start-combined.log`.
@@ -18,11 +18,11 @@ export const logger = createLogger({
       maxsize: 5120000,
       maxFiles: 5,
       filename: "logs/quick-start-error.log",
-      level: "error"
+      level: "error",
     }),
     new transports.File({ filename: "logs/quick-start-combined.log" }),
     new transports.Console({
-      level: "debug"
-    })
-  ]
+      level: "debug",
+    }),
+  ],
 });

@@ -1,4 +1,4 @@
-import { ProductDto } from "../../../models/inventory/product.dto";
+import { ProductDto } from "../../../models/warehouse/dtos/product.dto";
 
 export abstract class ProductServiceAbstract {
   public abstract async addNew(product: ProductDto): Promise<any>;

@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import { logger } from "./common/logger";
 
 // Entities/Models
-import { Product } from "./models/inventory/product.model";
+// import { Product } from "./models/warehouse/product.model";
 
 export class DatabaseConnection {
   public database: Sequelize;
@@ -33,7 +33,7 @@ export class DatabaseConnection {
       host: this.host,
       port: this.port,
       repositoryMode: true,
-      models: [Product], // or [Player, Team],
+      models: [__dirname + "models/**/*.model.ts"], // or [Player, Team],
     });
   }
 

@@ -1,14 +1,13 @@
 {
-  "name": "relational-db-service-template",
+  "name": "warehouse-service",
   "version": "1.0.0",
-  "description": "Relational DB template, this solution hepls to boilerplate Nodejs and SQL DB structure",
+  "description": "The project manage the structure from warehouse ",
   "main": "index.js",
   "dependencies": {
     "aws-sdk": "^2.653.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
-    "ejs-promise": "^0.3.3",
     "express": "^4.17.1",
     "joi": "^14.3.1",
     "jsonwebtoken": "^8.5.1",
@@ -62,13 +61,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/emanuelesausosa/relational-db-template.git"
+    "url": "https://github.com/emanuelesausosa/warehouse-service.git"
   },
   "keywords": [],
   "author": "Emanuel E. Sosa",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/emanuelesausosa/relational-db-template.git/issues"
+    "url": "https://github.com/emanuelesausosa/warehouse-service.git/issues"
   },
-  "homepage": "https://github.com/emanuelesausosa/relational-db-template.git#README"
+  "homepage": "https://github.com/emanuelesausosa/warehouse-service.git#README"
 }

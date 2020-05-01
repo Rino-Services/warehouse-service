@@ -3,8 +3,8 @@ swagger:
   entryFile:
     - ./src/domains/**/controllers/*
   outputFormat: OpenApi_3
-  name: Relational-db-Service-Template API
-  description: This a Rest API for Relational-db-Service-Template
+  name: Warehouse Service API
+  description: This a Rest API for Warehouse Service API
   license: MIT
   produces: [application/json]
   version: 0.0.1

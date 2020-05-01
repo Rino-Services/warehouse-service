@@ -1,8 +1,8 @@
-import { ProductServiceAbstract } from "../interfaces/product-service.interface";
-import { Product } from "../../../models/inventory/product.model";
-import { ProductDto } from "../../../models/inventory/product.dto";
-import { DatabaseConnection } from "../../../database.connection";
 import { Repository } from "sequelize-typescript";
+import { ProductServiceAbstract } from "../interfaces/product-service.interface";
+import { Product } from "../../../models/warehouse/product.model";
+import { ProductDto } from "../../../models/warehouse/dtos/product.dto";
+import { DatabaseConnection } from "../../../database.connection";
 import { UuIdGenerator } from "../helpers/uuid-generator.helper";
 
 export class ProductService extends ProductServiceAbstract {

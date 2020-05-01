@@ -6,10 +6,13 @@ import {
   UpdatedAt,
   DeletedAt,
   PrimaryKey,
+  BelongsToMany,
 } from "sequelize-typescript";
+import { Product } from "./product.model";
+import { ProductCategory } from "./product-category.model";
 
 @Table
-export class Product extends Model<Product> {
+export class Category extends Model<Category> {
   @PrimaryKey
   @Column
   id: string;
@@ -18,7 +21,7 @@ export class Product extends Model<Product> {
   title: string;
 
   @Column
-  model: string;
+  description: string;
 
   @CreatedAt
   creationDate: Date;
@@ -28,4 +31,7 @@ export class Product extends Model<Product> {
 
   @DeletedAt
   deletionDate: Date;
+
+  @BelongsToMany(() => Product, () => ProductCategory)
+  products: Product[];
 }

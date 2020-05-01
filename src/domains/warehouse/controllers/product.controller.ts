@@ -1,7 +1,7 @@
 import { Path, PathParam, GET, POST } from "typescript-rest";
 import { Inject } from "typescript-ioc";
 import { ProductService } from "../services/product.service";
-import { ProductDto } from "../../../models/inventory/product.dto";
+import { ProductDto } from "../../../models/warehouse/dtos/product.dto";
 import {
   BadRequestError,
   NotFoundError,
