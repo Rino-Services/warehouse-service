@@ -7,8 +7,6 @@ import {
   DeletedAt,
   PrimaryKey,
   HasMany,
-  BelongsTo,
-  ForeignKey,
 } from "sequelize-typescript";
 import { Product } from "./product.model";
 
