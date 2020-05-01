@@ -1,0 +1,19 @@
+swagger:
+  outputDirectory: ./dist
+  entryFile:
+    - ./src/domains/**/controllers/*
+  outputFormat: OpenApi_3
+  name: Relational-db-Service-Template API
+  description: This a Rest API for Relational-db-Service-Template
+  license: MIT
+  produces: [application/json]
+  version: 0.0.1
+  securityDefinitions:
+    default:
+      type: apiKey
+      in: header
+      name: Authorization
+    secondAuthenticator:
+      type: apiKey
+      in: header
+      name: Authorization
