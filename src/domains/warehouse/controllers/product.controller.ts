@@ -1,4 +1,4 @@
-import { Path, PathParam, GET, POST } from "typescript-rest";
+import { Path, PathParam, GET, POST, PreProcessor } from "typescript-rest";
 import { Inject } from "typescript-ioc";
 import { ProductService } from "../services/product.service";
 import { ProductDto } from "../../../models/warehouse/dtos/product.dto";
@@ -9,7 +9,9 @@ import {
 } from "typescript-rest/dist/server/model/errors";
 import { Tags } from "typescript-rest-swagger";
 import { logger } from "../../../common/logger";
-import { ProductModelValidator } from "../helpers/product-validator.helper";
+import { ProductItemDto } from "../../../models/warehouse/dtos/product-item.dto";
+import { ProductValidatorMiddleware } from "../middlewares/product-validator.middleware copy";
+import { NewResource } from "typescript-rest/dist/server/model/return-types";
 
 @Tags("Product")
 @Path("/warehouse/product")
@@ -55,16 +57,8 @@ export class ProductController {
    */
   @POST
   @Path("/add")
+  @PreProcessor(ProductValidatorMiddleware.validateModel)
   public async addNewProduct(productToAdd: ProductDto): Promise<any> {
-    const validationResult = ProductModelValidator.validate(productToAdd);
-
-    if (validationResult.error) {
-      logger.error(`ProductController:addNewProduct ${validationResult.error}`);
-      throw new BadRequestError(
-        `Those fields are required: ${validationResult.error}`
-      );
-    }
-
     try {
       const result = await this.productService.addNew(productToAdd);
       logger.debug(result);
@@ -78,6 +72,31 @@ export class ProductController {
     } catch (err) {
       logger.error(`ProductController:addNewProduct ${err}`);
       throw new InternalServerError(`${err}`);
+    }
+  }
+
+  /**
+   * 
+   * @param productId uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
+   * @param itemsToAdd model thats contains items to add
+   */
+  @POST
+  @Path("/:productId/addProductItems")
+  @PreProcessor(ProductValidatorMiddleware.validateProductItems)
+  public async addProductItems(
+    @PathParam("productId") productId: string,
+    itemsToAdd: ProductItemDto
+  ) {
+    const result = await this.productService.addNewProductsItems(
+      productId,
+      itemsToAdd
+    );
+    if (result) {
+      return new NewResource<void>("");
+    } else {
+      throw new InternalServerError(
+        `An error has occuerd while trying to store the information, try agian`
+      );
     }
   }
 }

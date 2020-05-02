@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { SupplierModelValidator } from "../helpers/supplier-validator";
+import { SupplierModelValidator } from "../helpers/supplier-validator.helper";
 import { logger } from "../../../common/logger";
 import { BadRequestError } from "typescript-rest/dist/server/model/errors";
 export class SupplierValidatorMiddleware {

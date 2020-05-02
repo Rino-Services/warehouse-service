@@ -16,19 +16,10 @@ export class ProductInstance extends Model<ProductInstance> {
   serialNumber: string;
 
   @Column
-  title: string;
+  costUnitPrice: number;
 
   @Column
-  model: string;
-
-  @Column
-  description: string;
-
-  @Column
-  costPrice: number;
-
-  @Column
-  salePrice: number;
+  saleUnitPrice: number;
 
   @CreatedAt
   creationDate: Date;

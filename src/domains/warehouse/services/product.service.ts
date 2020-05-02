@@ -8,11 +8,14 @@ import { Spec } from "../../../models/warehouse/spec.model";
 import { ProductSpecs } from "../../../models/warehouse/product-specs.model";
 import { logger } from "../../../common/logger";
 import { SpecProduct } from "../../../models/warehouse/dtos/spec-product.dto";
+import { ProductItemDto } from "../../../models/warehouse/dtos/product-item.dto";
+import { ProductInstance } from "../../../models/warehouse/product-instance.model";
 
 export class ProductService implements ModelServiceAbstract {
   private productRepository: Repository<Product>;
   private specRepository: Repository<Spec>;
   private productSpecRepository: Repository<ProductSpecs>;
+  private productInstanceRespository: Repository<ProductInstance>;
   private db: DatabaseConnection;
 
   private readonly logScopeMessage: string = "ProductService :: ";
@@ -23,6 +26,7 @@ export class ProductService implements ModelServiceAbstract {
     this.productRepository = sequelize.getRepository(Product);
     this.specRepository = sequelize.getRepository(Spec);
     this.productSpecRepository = sequelize.getRepository(ProductSpecs);
+    this.productInstanceRespository = sequelize.getRepository(ProductInstance);
   }
 
   public async findAll(): Promise<any> {
@@ -88,5 +92,40 @@ export class ProductService implements ModelServiceAbstract {
 
   public update<String>(id: String, product: ProductDto): Promise<any> {
     throw new Error("Method not implemented.");
+  }
+
+  public async addNewProductsItems(
+    productId: string,
+    itemsToAdd: ProductItemDto
+  ): Promise<boolean> {
+    const logMessage: string = `${this.logScopeMessage} -> `;
+
+    try {
+      const product = await this.productRepository.findOne({
+        where: { id: productId },
+      });
+      if (product) {
+        itemsToAdd.serialNumbers.forEach(async (item) => {
+          // validate that serial number does not exist
+          if (
+            !(await this.productInstanceRespository.findOne({
+              where: { serialNumber: item },
+            }))
+          ) {
+            await this.productInstanceRespository.create({
+              serialNumber: item,
+              costUnitPrice: itemsToAdd.costUnitPrice,
+              saleUnitPrice: itemsToAdd.saleUnitPrice,
+              productId
+            });
+          }
+        });
+      }
+
+      return true;
+    } catch (err) {
+      logger.error(`${logMessage} ${err}`);
+      return false;
+    }
   }
 }
