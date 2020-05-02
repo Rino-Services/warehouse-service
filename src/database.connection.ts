@@ -3,7 +3,14 @@ import { config } from "dotenv";
 import { logger } from "./common/logger";
 
 // Entities/Models
-// import { Product } from "./models/warehouse/product.model";
+import { Supplier } from "./models/warehouse/supplier.model";
+import { Product } from "./models/warehouse/product.model";
+import { Category } from "./models/warehouse/category.model";
+import { Brand } from "./models/warehouse/brand.model";
+import { ProductInstance } from "./models/warehouse/product-instance.model";
+import { Spec } from "./models/warehouse/spec.model";
+import { ProductSpecs } from "./models/warehouse/product-specs.model";
+import { ProductCategory } from "./models/warehouse/product-category.model";
 
 export class DatabaseConnection {
   public database: Sequelize;
@@ -33,7 +40,16 @@ export class DatabaseConnection {
       host: this.host,
       port: this.port,
       repositoryMode: true,
-      models: [__dirname + "models/**/*.model.ts"], // or [Player, Team],
+      models: [
+        Supplier,
+        Category,
+        Brand,
+        Product,
+        ProductCategory,
+        ProductInstance,
+        Spec,
+        ProductSpecs,
+      ], // or [Player, Team],
     });
   }
 

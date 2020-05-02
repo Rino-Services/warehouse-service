@@ -1,6 +1,6 @@
 import * as aws from "aws-sdk";
 import { Consumer } from "sqs-consumer";
-import { AwsConfig, AwsDefaultConfig } from "../aws-config";
+import { AwsDefaultConfig } from "../aws-config";
 import { logger } from "../../logger";
 import { Ses } from "../ses";
 import { Inject } from "typescript-ioc";

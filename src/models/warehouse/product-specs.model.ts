@@ -1,14 +1,17 @@
 import { Table, Column, Model, ForeignKey } from "sequelize-typescript";
-import { ProductInstance } from "./product-instance.model";
 import { Spec } from "./spec.model";
+import { Product } from "./product.model";
 
 @Table
-export class ItemsSpecs extends Model<ItemsSpecs> {
-  @ForeignKey(() => ProductInstance)
+export class ProductSpecs extends Model<ProductSpecs> {
+  @ForeignKey(() => Product)
   @Column
-  itemId: number;
+  productId: string;
 
   @ForeignKey(() => Spec)
   @Column
   specId: number;
+
+  @Column
+  value: string;
 }

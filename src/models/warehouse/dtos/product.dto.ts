@@ -1,3 +1,5 @@
+import { SpecProduct } from "./spec-product.dto";
+
 export class ProductDto {
   id: string;
   title: string;
@@ -5,4 +7,5 @@ export class ProductDto {
   description: string;
   brandId: string;
   supplierId: string;
+  specs: Array<SpecProduct>;
 }

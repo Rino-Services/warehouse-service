@@ -16,6 +16,8 @@ import { Brand } from "./brand.model";
 import { Supplier } from "./supplier.model";
 import { Category } from "./category.model";
 import { ProductCategory } from "./product-category.model";
+import { Spec } from "./spec.model";
+import { ProductSpecs } from "./product-specs.model";
 
 @Table
 export class Product extends Model<Product> {
@@ -63,4 +65,7 @@ export class Product extends Model<Product> {
 
   @BelongsToMany(() => Category, () => ProductCategory)
   categories: Category[];
+
+  @BelongsToMany(() => Spec, () => ProductSpecs)
+  specs: Spec[];
 }

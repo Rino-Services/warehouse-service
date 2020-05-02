@@ -9,6 +9,7 @@ export class ProductModelValidator {
     description: Joi.string().empty(),
     brandId: Joi.string().required(),
     supplierId: Joi.string().required(),
+    specs: Joi.array(),
   });
 
   /**

@@ -7,11 +7,8 @@ import {
   DeletedAt,
   ForeignKey,
   BelongsTo,
-  BelongsToMany,
 } from "sequelize-typescript";
 import { Product } from "./product.model";
-import { Spec } from "./spec.model";
-import { ItemsSpecs } from "./items-specs.model";
 
 @Table
 export class ProductInstance extends Model<ProductInstance> {
@@ -51,7 +48,4 @@ export class ProductInstance extends Model<ProductInstance> {
 
   @BelongsTo(() => Product)
   product: Product;
-
-  @BelongsToMany(() => Spec, () => ItemsSpecs)
-  specs: Spec[];
 }

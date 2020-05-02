@@ -17,7 +17,7 @@ export class ProductController {
 
   @GET
   @Path("/all")
-  @Tags("Inventory", "Products")
+  @Tags("Products")
   public async getAll() {
     const result = await this.productService.findAll();
     return result;
@@ -29,7 +29,7 @@ export class ProductController {
    */
   @GET
   @Path("/find/:id")
-  @Tags("Inventory", "Products")
+  @Tags("Products")
   public async findProductById(@PathParam("id") id: string) {
     if (id == null) {
       throw new BadRequestError("Id required");
@@ -56,7 +56,7 @@ export class ProductController {
    */
   @POST
   @Path("/add")
-  @Tags("Inventory", "Products")
+  @Tags("Products")
   public async addNewProduct(productToAdd: ProductDto): Promise<any> {
     const validationResult = ProductModelValidator.validate(productToAdd);
 
