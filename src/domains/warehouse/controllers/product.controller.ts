@@ -11,13 +11,13 @@ import { Tags } from "typescript-rest-swagger";
 import { logger } from "../../../common/logger";
 import { ProductModelValidator } from "../helpers/product-validator.helper";
 
-@Path("/inventory/product")
+@Tags("Product")
+@Path("/warehouse/product")
 export class ProductController {
   @Inject productService: ProductService;
 
   @GET
   @Path("/all")
-  @Tags("Products")
   public async getAll() {
     const result = await this.productService.findAll();
     return result;
@@ -29,7 +29,6 @@ export class ProductController {
    */
   @GET
   @Path("/find/:id")
-  @Tags("Products")
   public async findProductById(@PathParam("id") id: string) {
     if (id == null) {
       throw new BadRequestError("Id required");
@@ -56,7 +55,6 @@ export class ProductController {
    */
   @POST
   @Path("/add")
-  @Tags("Products")
   public async addNewProduct(productToAdd: ProductDto): Promise<any> {
     const validationResult = ProductModelValidator.validate(productToAdd);
 

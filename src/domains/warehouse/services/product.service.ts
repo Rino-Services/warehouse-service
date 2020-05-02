@@ -26,7 +26,9 @@ export class ProductService implements ModelServiceAbstract {
   }
 
   public async findAll(): Promise<any> {
-    const result = await this.productRepository.findAll();
+    const result = await this.productRepository.findAll({
+      include: [this.specRepository],
+    });
     return result;
   }
 
