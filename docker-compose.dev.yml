@@ -1,0 +1,30 @@
+version: "3.1"
+services:
+  postgres:
+    image: "postgres:11.5"
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: rino
+      POSTGRES_DB: warehousedb
+      POSTGRES_PASSWORD: rino1488
+      PGDATA: /var/lib/postgresql/data/pgdata
+  api:
+    depends_on:
+      - postgres
+    build:
+      dockerfile: Dockerfile.dev
+      context: .
+    environment:
+      TZ: America/Tegucigalpa
+      LC_CTYPE: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      PGUSER: rino
+      PGHOST: postgres
+      PGDATABASE: warehousedb
+      PGPASSWORD: rino1488
+      PGPORT: 5432
+      AWS_KEYID: AKIAY62NM6GGW7YNOEXE
+      AWS_KEYSECRET: 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
+    ports:
+      - 3003:3000

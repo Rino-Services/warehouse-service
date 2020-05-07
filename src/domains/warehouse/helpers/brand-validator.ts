@@ -1,5 +1,5 @@
 import * as Joi from "joi";
-import { BrandDto } from "../../../models/warehouse/dtos/Brand.dto";
+import { BrandDto } from "../../../models/warehouse/dtos/brand.dto";
 
 export class BrandModelValidator {
   private static readonly Schema: Joi.ObjectSchema = Joi.object().keys({

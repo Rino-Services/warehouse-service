@@ -43,34 +43,44 @@ export class ProductInstanceService implements ModelServiceAbstract {
     serialNumbers: Array<string>,
     productId: string,
     statusCode: string
-  ) {
-    const items: Array<ProductInstance> = await this.productInstanceRepository.findAll(
-      {
-        where: {
-          serialNumber: serialNumbers,
-          productId,
-        },
-      }
-    );
+  ): Promise<number> {
+    let result: number = 0;
+    try {
+      const items: Array<ProductInstance> = await this.productInstanceRepository.findAll(
+        {
+          where: {
+            serialNumber: serialNumbers,
+            productId,
+          },
+        }
+      );
 
-    logger.debug(`${this.logMessage} setStatus -> ${items}`);
+      logger.debug(`${this.logMessage} setStatus -> ${items}`);
 
-    const status: WarehouseStatus = await this.warehouseStatusesRepository.findOne(
-      {
-        where: {
-          initials: statusCode,
-        },
-      }
-    );
+      const status: WarehouseStatus = await this.warehouseStatusesRepository.findOne(
+        {
+          where: {
+            initials: statusCode,
+          },
+        }
+      );
 
-    logger.debug(`${this.logMessage} setStatus -> ${status}`);
-
-    items.forEach(async (item) => {
-      await this.itemStatusesRepository.create({
-        warehouseStatusId: status.id,
-        productInstanceId: item.id,
+      logger.debug(`${this.logMessage} setStatus -> ${status}`);
+      items.forEach(async (item) => {
+        result += 1;
+        await this.itemStatusesRepository.create({
+          warehouseStatusId: status.id,
+          productInstanceId: item.id,
+        });
       });
-    });
+
+      logger.info(`${this.logMessage} setStatus -> ${result} result added`);
+    } catch (err) {
+      logger.error(`${this.logMessage} setStatus -> ${err}`);
+      result = -1;
+    } finally {
+      return result;
+    }
   }
 
   public async getStatusByProduct(productId: string): Promise<Array<any>> {

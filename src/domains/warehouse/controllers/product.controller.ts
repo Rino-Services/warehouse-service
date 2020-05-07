@@ -1,4 +1,4 @@
-import { Path, PathParam, GET, POST, PreProcessor } from "typescript-rest";
+import { Path, PathParam, GET, POST, PreProcessor, PUT } from "typescript-rest";
 import { Inject } from "typescript-ioc";
 import { ProductService } from "../services/product.service";
 import { ProductDto } from "../../../models/warehouse/dtos/product.dto";
@@ -118,5 +118,63 @@ export class ProductController {
     );
 
     return result;
+  }
+
+  /**
+   *
+   * @param productId uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
+   * @param serialNumbers serials numbers put in array, sample ["9000000000100", "9000000000200","9000000000300"]
+   */
+  @PUT
+  @Path("/:productId/validateProductItemInStorage")
+  @PreProcessor(ProductValidatorMiddleware.vaidateProductId)
+  public async validateProductItemInStorage(
+    @PathParam("productId") productId: string,
+    serialNumbers: Array<string>
+  ) {
+    const status: string = "VLDN"; // mean validation product
+
+    const result = await this.productInstanceService.setStatus(
+      serialNumbers,
+      productId,
+      status
+    );
+
+    if (result < 0) {
+      throw new InternalServerError(
+        "An error has occuerred while trying to set a Status to Product Items"
+      );
+    } else {
+      return { message: ` ${result} resource added` };
+    }
+  }
+
+  /**
+   *
+   * @param productId uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
+   * @param serialNumbers serials numbers put in array, sample ["9000000000100", "9000000000200","9000000000300"]
+   */
+  @PUT
+  @Path("/:productId/sendToStock")
+  @PreProcessor(ProductValidatorMiddleware.vaidateProductId)
+  public async sendToStock(
+    @PathParam("productId") productId: string,
+    serialNumbers: Array<string>
+  ) {
+    const status: string = "STCK"; // mean stock
+
+    const result = await this.productInstanceService.setStatus(
+      serialNumbers,
+      productId,
+      status
+    );
+
+    if (result < 0) {
+      throw new InternalServerError(
+        "An error has occuerred while trying to set a Status to Product Items"
+      );
+    } else {
+      return { message: ` ${result} resource added` };
+    }
   }
 }
