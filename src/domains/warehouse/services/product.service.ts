@@ -10,8 +10,12 @@ import { logger } from "../../../common/logger";
 import { SpecProduct } from "../../../models/warehouse/dtos/spec-product.dto";
 import { ProductItemDto } from "../../../models/warehouse/dtos/product-item.dto";
 import { ProductInstance } from "../../../models/warehouse/product-instance.model";
+import { Inject } from "typescript-ioc";
+import { ProductInstanceService } from "./product-instance.service";
 
 export class ProductService implements ModelServiceAbstract {
+  @Inject productInstanceService: ProductInstanceService;
+
   private productRepository: Repository<Product>;
   private specRepository: Repository<Spec>;
   private productSpecRepository: Repository<ProductSpecs>;
@@ -112,12 +116,22 @@ export class ProductService implements ModelServiceAbstract {
               where: { serialNumber: item },
             }))
           ) {
-            await this.productInstanceRespository.create({
-              serialNumber: item,
-              costUnitPrice: itemsToAdd.costUnitPrice,
-              saleUnitPrice: itemsToAdd.saleUnitPrice,
-              productId
-            });
+            const itemSaved: ProductInstance = await this.productInstanceRespository.create(
+              {
+                serialNumber: item,
+                costUnitPrice: itemsToAdd.costUnitPrice,
+                saleUnitPrice: itemsToAdd.saleUnitPrice,
+                productId,
+              }
+            );
+
+            if (itemSaved) {
+              await this.productInstanceService.setStatus(
+                [itemSaved.serialNumber],
+                productId,
+                "STRG"
+              );
+            }
           }
         });
       }

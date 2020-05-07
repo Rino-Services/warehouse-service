@@ -12,11 +12,13 @@ import { logger } from "../../../common/logger";
 import { ProductItemDto } from "../../../models/warehouse/dtos/product-item.dto";
 import { ProductValidatorMiddleware } from "../middlewares/product-validator.middleware copy";
 import { NewResource } from "typescript-rest/dist/server/model/return-types";
+import { ProductInstanceService } from "../services/product-instance.service";
 
 @Tags("Product")
 @Path("/warehouse/product")
 export class ProductController {
   @Inject productService: ProductService;
+  @Inject productInstanceService: ProductInstanceService;
 
   @GET
   @Path("/all")
@@ -76,12 +78,13 @@ export class ProductController {
   }
 
   /**
-   * 
+   *
    * @param productId uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
    * @param itemsToAdd model thats contains items to add
    */
   @POST
   @Path("/:productId/addProductItems")
+  @PreProcessor(ProductValidatorMiddleware.vaidateProductId)
   @PreProcessor(ProductValidatorMiddleware.validateProductItems)
   public async addProductItems(
     @PathParam("productId") productId: string,
@@ -98,5 +101,22 @@ export class ProductController {
         `An error has occuerd while trying to store the information, try agian`
       );
     }
+  }
+
+  /**
+   *
+   * @param productId uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
+   */
+  @GET
+  @Path("/:productId/statusByProduct")
+  @PreProcessor(ProductValidatorMiddleware.vaidateProductId)
+  public async getProductInstanceStatusByProductId(
+    @PathParam("productId") productId: string
+  ) {
+    const result = await this.productInstanceService.getStatusByProduct(
+      productId
+    );
+
+    return result;
   }
 }
