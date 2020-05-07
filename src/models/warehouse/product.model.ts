@@ -34,6 +34,9 @@ export class Product extends Model<Product> {
   @Column
   description: string;
 
+  @Column
+  datePublished: Date;
+
   @CreatedAt
   creationDate: Date;
 
