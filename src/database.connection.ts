@@ -62,7 +62,7 @@ export class DatabaseConnection {
       await this.database.authenticate();
       logger.info(`Database ${this.db} connected`);
 
-      await this.database.sync();
+      await this.database.sync({ force: true });
       logger.info(`Database ${this.db} is sync now`);
     } catch (err) {
       logger.error(`Database ${this.db} has not been connected`);
