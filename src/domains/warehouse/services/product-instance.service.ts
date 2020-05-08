@@ -105,7 +105,7 @@ export class ProductInstanceService implements ModelServiceAbstract {
           FROM 
             "ProductInstances" PI INNER JOIN "ItemStatuses" ITS ON PI."id" = ITS."productInstanceId"
             INNER JOIN "WarehouseStatuses" WS ON WS."id" = ITS."warehouseStatusId"
-          WHERE (PI."deletionDate" IS NULL AND PI."productId" = '06c9eab0-8fff-11ea-9df0-3de0bd1831bb')
+          WHERE (PI."deletionDate" IS NULL AND PI."productId" = '${productId}')
           GROUP BY 
             WS."initials";
         `,
@@ -124,28 +124,117 @@ export class ProductInstanceService implements ModelServiceAbstract {
     productId: string,
     status: string,
     qty: number
-  ): Promise<void> {
-    let enqueueMessage: IEnqueueMessage;
+  ): Promise<boolean> {
+    let resultTran: boolean = false;
 
-    const product: Product = await this.productRepository.findOne({
-      where: { id: productId },
-    });
+    try {
+      let enqueueMessage: IEnqueueMessage;
 
-    if (product)
-      switch (status) {
-        case "STCK":
-          if (!product.datePublished) {
+      const product: Product = await this.productRepository.findOne({
+        where: { id: productId },
+      });
+
+      logger.debug(
+        `${this.logMessage} publishProductChanges -> ${JSON.stringify(product)}`
+      );
+
+      if (product) {
+        switch (status) {
+          case "STCK":
+            if (product.datePublished) {
+              const updateProductMessageAttr: UpdateProductMessageAttrs = {
+                ProductId: new MessageMetaData("String", product.id),
+                Operation: new MessageMetaData("String", status),
+                ProductStock: new MessageMetaData("Number", qty.toString()),
+              };
+
+              logger.debug(
+                `${this.logMessage} publishProductChanges -> ${JSON.stringify(
+                  updateProductMessageAttr
+                )}`
+              );
+              enqueueMessage = new UpdateProductEnQueueMessage(
+                updateProductMessageAttr
+              );
+              if (await enqueueMessage.process()) {
+                await this.productRepository.update(
+                  {
+                    datePublished: new Date(),
+                  },
+                  {
+                    where: {
+                      id: productId,
+                    },
+                  }
+                );
+                resultTran = true;
+              }
+            } else {
+              const newProductMessageAttr: NewProductMessageAttrs = {
+                ProductId: new MessageMetaData("String", product.id),
+                ProductTitle: new MessageMetaData("String", product.title),
+                ProductModel: new MessageMetaData("String", product.model),
+                ProductDescription: new MessageMetaData(
+                  "String",
+                  product.description
+                ),
+                ProductDatePublished: new MessageMetaData(
+                  "String",
+                  new Date().toDateString()
+                ),
+                ProductStock: new MessageMetaData("Number", qty.toString()),
+              };
+
+              logger.debug(
+                `${this.logMessage} publishProductChanges -> ${JSON.stringify(
+                  newProductMessageAttr
+                )}`
+              );
+
+              enqueueMessage = new AddnewProductEnQueueMessage(
+                newProductMessageAttr
+              );
+
+              if (await enqueueMessage.process()) {
+                const result = await this.productRepository.update(
+                  {
+                    datePublished: new Date(),
+                  },
+                  {
+                    where: {
+                      id: productId,
+                    },
+                  }
+                );
+
+                logger.debug(
+                  `${this.logMessage} publishProductChanges -> ${JSON.stringify(
+                    result
+                  )}`
+                );
+
+                resultTran = true;
+              }
+            }
+
+            break;
+          case "SOLD":
             const updateProductMessageAttr: UpdateProductMessageAttrs = {
               ProductId: new MessageMetaData("String", product.id),
               Operation: new MessageMetaData("String", status),
               ProductStock: new MessageMetaData("Number", qty.toString()),
             };
 
+            logger.debug(
+              `${this.logMessage} publishProductChanges -> ${JSON.stringify(
+                updateProductMessageAttr
+              )}`
+            );
             enqueueMessage = new UpdateProductEnQueueMessage(
               updateProductMessageAttr
             );
             if (await enqueueMessage.process()) {
-              await this.productRepository.update(
+              const result = await this.productRepository.update(
                 {
                   datePublished: new Date(),
                 },
@@ -155,68 +244,27 @@ export class ProductInstanceService implements ModelServiceAbstract {
                   },
                 }
               );
-            }
-          } else {
-            const newProductMessageAttr: NewProductMessageAttrs = {
-              ProductId: new MessageMetaData("String", product.id),
-              ProductTitle: new MessageMetaData("String", product.title),
-              ProductModel: new MessageMetaData("String", product.model),
-              ProductDescription: new MessageMetaData(
-                "String",
-                product.description
-              ),
-              ProductDatePublished: new MessageMetaData(
-                "String",
-                product.datePublished.toDateString()
-              ),
-              ProductStock: new MessageMetaData("Number", qty.toString()),
-            };
 
-            enqueueMessage = new AddnewProductEnQueueMessage(
-              newProductMessageAttr
-            );
-
-            if (await enqueueMessage.process()) {
-              await this.productRepository.update(
-                {
-                  datePublished: new Date(),
-                },
-                {
-                  where: {
-                    id: productId,
-                  },
-                }
+              logger.debug(
+                `${this.logMessage} publishProductChanges -> ${JSON.stringify(
+                  result
+                )}`
               );
+              resultTran = true;
             }
-          }
 
-          break;
-        case "SOLD":
-          const updateProductMessageAttr: UpdateProductMessageAttrs = {
-            ProductId: new MessageMetaData("String", product.id),
-            Operation: new MessageMetaData("String", status),
-            ProductStock: new MessageMetaData("Number", qty.toString()),
-          };
-
-          enqueueMessage = new UpdateProductEnQueueMessage(
-            updateProductMessageAttr
-          );
-          if (await enqueueMessage.process()) {
-            await this.productRepository.update(
-              {
-                datePublished: new Date(),
-              },
-              {
-                where: {
-                  id: productId,
-                },
-              }
+            break;
+          default:
+            logger.debug(
+              `${this.logMessage} publishProductChanges -> Debug status > ${status}`
             );
-          }
-
-          break;
-        default:
-          break;
+            break;
+        }
       }
+    } catch (err) {
+      logger.error(`${this.logMessage} publishProductChanges -> ${err}`);
+    } finally {
+      return resultTran;
+    }
   }
 }

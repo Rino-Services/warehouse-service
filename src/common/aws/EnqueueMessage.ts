@@ -9,7 +9,9 @@ export interface IEnqueueMessage {
 
 export class EnqueueMessage implements IEnqueueMessage {
   @Inject private sns: Sns;
-  constructor(private params: AwsMessage) {}
+  constructor(private params: AwsMessage) {
+    logger.debug(`EnqueueMessage -> constructor -> ${JSON.stringify(params)}`);
+  }
 
   public async process(): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
