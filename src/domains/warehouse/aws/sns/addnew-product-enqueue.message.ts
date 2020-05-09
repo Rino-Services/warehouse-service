@@ -1,4 +1,4 @@
-import { EnqueueMessage } from "../../../../common/aws/EnqueueMessage";
+import { EnqueueMessage } from "../../../../common/aws/sns/EnqueueMessage";
 import { AwsMessage } from "../../../../common/aws/message.model";
 import { NewProductMessageAttrs } from "./dtos/newproduct-message-attributes.dto";
 import { AutoSalesWarehouseServiceAddnewProductStore as constants } from "./warehouse-arns-sns.constants";

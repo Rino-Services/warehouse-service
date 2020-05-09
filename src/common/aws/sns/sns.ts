@@ -1,6 +1,6 @@
 import * as aws from "aws-sdk";
 import { PromiseResult } from "aws-sdk/lib/request";
-import { AwsConfig, AwsDefaultConfig } from "./aws-config";
+import { AwsConfig, AwsDefaultConfig } from "../aws-config";
 
 export class Sns extends AwsDefaultConfig {
   constructor() {

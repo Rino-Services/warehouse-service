@@ -1,7 +1,7 @@
 import { Sns } from "./sns";
-import { AwsMessage } from "./message.model";
+import { AwsMessage } from "../message.model";
 import { Inject } from "typescript-ioc";
-import { logger } from "../logger";
+import { logger } from "../../logger";
 
 export interface IEnqueueMessage {
   process(): Promise<boolean>;
