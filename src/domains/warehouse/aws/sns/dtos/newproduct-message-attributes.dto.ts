@@ -1,4 +1,4 @@
-import { MessageMetaData } from "../../../../../common/models/metadata-message-attibutes.model";
+import { MessageMetaData } from "../../../../../common/models/metadata-message-attributes.model";
 
 export class NewProductMessageAttrs {
   ProductId: MessageMetaData;

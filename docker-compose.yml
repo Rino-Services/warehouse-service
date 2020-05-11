@@ -25,5 +25,6 @@ services:
       PGPORT: 5432
       AWS_KEYID: AKIAY62NM6GGW7YNOEXE
       AWS_KEYSECRET: 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
+      PORT: 3003
     ports:
       - 3003:3000

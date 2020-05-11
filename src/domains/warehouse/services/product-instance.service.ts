@@ -9,7 +9,7 @@ import { logger } from "../../../common/logger";
 import { AddnewProductEnQueueMessage } from "../aws/sns/addnew-product-enqueue.message";
 import { Product } from "../../../models/warehouse/product.model";
 import { NewProductMessageAttrs } from "../aws/sns/dtos/newproduct-message-attributes.dto";
-import { MessageMetaData } from "../../../common/models/metadata-message-attibutes.model";
+import { MessageMetaData } from "../../../common/models/metadata-message-attributes.model";
 import { UpdateProductMessageAttrs } from "../aws/sns/dtos/updateproduct-message-attributes.dto";
 import { IEnqueueMessage } from "../../../common/aws/sns/EnqueueMessage";
 import { UpdateProductEnQueueMessage } from "../aws/sns/update-product-store-enqueue.message";
