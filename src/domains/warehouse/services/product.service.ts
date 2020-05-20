@@ -46,7 +46,7 @@ export class ProductService implements ModelServiceAbstract {
       let result = await this.productRepository.create({
         id: UuIdGenerator.generate(),
         title: product.title,
-        model: product.model,
+        baseImageUrl: product.baseImageUrl,
         description: product.description,
         brandId: product.brandId,
         supplierId: product.supplierId,
@@ -119,8 +119,6 @@ export class ProductService implements ModelServiceAbstract {
             const itemSaved: ProductInstance = await this.productInstanceRespository.create(
               {
                 serialNumber: item,
-                costUnitPrice: itemsToAdd.costUnitPrice,
-                saleUnitPrice: itemsToAdd.saleUnitPrice,
                 productId,
               }
             );

@@ -172,8 +172,7 @@ export class ProductInstanceService implements ModelServiceAbstract {
             } else {
               const newProductMessageAttr: NewProductMessageAttrs = {
                 ProductId: new MessageMetaData("String", product.id),
-                ProductTitle: new MessageMetaData("String", product.title),
-                ProductModel: new MessageMetaData("String", product.model),
+                ProductTitle: new MessageMetaData("String", product.title),      
                 ProductDescription: new MessageMetaData(
                   "String",
                   product.description

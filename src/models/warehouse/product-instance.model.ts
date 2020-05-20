@@ -12,17 +12,12 @@ import {
 import { Product } from "./product.model";
 import { WarehouseStatus } from "./warehouse-status.model";
 import { ItemStatuses } from "./item-status.model";
+import { ProductModel } from "./product-model.model";
 
 @Table
 export class ProductInstance extends Model<ProductInstance> {
   @Column
   serialNumber: string;
-
-  @Column
-  costUnitPrice: number;
-
-  @Column
-  saleUnitPrice: number;
 
   @CreatedAt
   creationDate: Date;
@@ -36,12 +31,12 @@ export class ProductInstance extends Model<ProductInstance> {
   /**
    * relationships
    */
-  @ForeignKey(() => Product)
+  @ForeignKey(() => ProductModel)
   @Column
-  productId: string;
+  productModelId: string;
 
-  @BelongsTo(() => Product)
-  product: Product;
+  @BelongsTo(() => ProductModel)
+  productModel: ProductModel;
 
   @BelongsToMany(() => WarehouseStatus, () => ItemStatuses)
   itemStatus: WarehouseStatus[];
