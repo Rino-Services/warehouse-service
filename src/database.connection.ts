@@ -13,6 +13,7 @@ import { ProductSpecs } from "./models/warehouse/product-specs.model";
 import { ProductCategory } from "./models/warehouse/product-category.model";
 import { ItemStatuses } from "./models/warehouse/item-status.model";
 import { WarehouseStatus } from "./models/warehouse/warehouse-status.model";
+import { ProductModel } from "./models/warehouse/product-model.model";
 
 export class DatabaseConnection {
   public database: Sequelize;
@@ -47,6 +48,7 @@ export class DatabaseConnection {
         Category,
         Brand,
         Product,
+        ProductModel,
         ProductCategory,
         ProductInstance,
         Spec,
