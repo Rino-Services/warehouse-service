@@ -3,6 +3,8 @@ import { ProductModel } from "../../../models/warehouse/product-model.model";
 import { Repository } from "sequelize-typescript";
 import { DatabaseConnection } from "../../../database.connection";
 import { logger } from "../../../common/logger";
+import { ProductModelDto } from "../../../models/warehouse/dtos/product-model.dto";
+import { UuIdGenerator } from "../helpers/uuid-generator.helper";
 
 export class ProductModelService implements ModelServiceAbstract {
   private productModelRepository: Repository<ProductModel>;
@@ -16,8 +18,26 @@ export class ProductModelService implements ModelServiceAbstract {
     this.productModelRepository = sequelize.getRepository(ProductModel);
   }
 
-  addNew(modelDto: any): Promise<any> {
-    throw new Error("Method not implemented.");
+  public async addNew(model: {
+    dto: ProductModelDto;
+    productId: string;
+  }): Promise<any> {
+    const logMessage: string = `${this.logScopeMessage} addNew ->`;
+
+    try {
+      const result = await this.productModelRepository.create({
+        id: UuIdGenerator.generate(),
+        costPrice: model.dto.costPrice,
+        description: model.dto.description,
+        productId: model.productId,
+      });
+
+      logger.debug(`${logMessage} ${JSON.stringify(result)}`);
+      return result;
+    } catch (err) {
+      logger.error(`${logMessage} ${JSON.stringify(err)}`);
+      return null;
+    }
   }
   findById<T>(id: T): Promise<any> {
     throw new Error("Method not implemented.");

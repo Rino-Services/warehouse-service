@@ -1,6 +1,7 @@
 import * as Joi from "joi";
 import { ProductDto } from "../../../models/warehouse/dtos/product.dto";
 import { ProductItemDto } from "../../../models/warehouse/dtos/product-item.dto";
+import { ProductModelDto } from "../../../models/warehouse/dtos/product-model.dto";
 
 export class ProductModelValidator {
   private static readonly mainSchema: Joi.ObjectSchema = Joi.object().keys({
@@ -19,6 +20,14 @@ export class ProductModelValidator {
       serialNumbers: Joi.array().required(),
     }
   );
+
+  private static readonly productModelSchema: Joi.ObjectSchema = Joi.object().keys(
+    {
+      costPrice: Joi.number().greater(0).required(),
+      description: Joi.string().required(),
+    }
+  );
+
   /**
    * validate
    */
@@ -30,5 +39,11 @@ export class ProductModelValidator {
     product: ProductItemDto
   ): Joi.ValidationResult<any> {
     return Joi.validate(product, this.productItemSchema);
+  }
+
+  public static validateProductModel(
+    productModel: ProductModelDto
+  ): Joi.ValidationResult<any> {
+    return Joi.validate(productModel, this.productModelSchema);
   }
 }

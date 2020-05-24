@@ -5,7 +5,7 @@ import {
   POST,
   PreProcessor,
   PUT,
-  FileParam,
+  //FileParam,
 } from "typescript-rest";
 import { Inject } from "typescript-ioc";
 import { ProductService } from "../services/product.service";
@@ -22,12 +22,14 @@ import { ProductValidatorMiddleware } from "../middlewares/product-validator.mid
 import { NewResource } from "typescript-rest/dist/server/model/return-types";
 import { ProductInstanceService } from "../services/product-instance.service";
 import { ProductModelDto } from "../../../models/warehouse/dtos/product-model.dto";
+import { ProductModelService } from "../services/product-model.service";
 
 @Tags("Product")
 @Path("/warehouse/product")
 export class ProductController {
   @Inject productService: ProductService;
   @Inject productInstanceService: ProductInstanceService;
+  @Inject productModelService: ProductModelService;
 
   @GET
   @Path("/all")
@@ -88,23 +90,41 @@ export class ProductController {
 
   /**
    * addNewProductModel
-   * @param productModelDto
+   * @param productId uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
+   * @param productModelDto Product model basic description
    */
   @POST
-  @Path("/newModel/:id")
-  public async addNewProductModel(productModelDto: ProductModelDto) {
-    
+  @Path("/add/newModel/:productId")
+  @PreProcessor(ProductValidatorMiddleware.vaidateProductId)
+  @PreProcessor(ProductValidatorMiddleware.validateProductModel)
+  public async addNewProductModel(
+    @PathParam("productId") productId: string,
+    productModelDto: ProductModelDto
+  ) {
+    const result = await this.productModelService.addNew({
+      dto: productModelDto,
+      productId: productId,
+    });
+
+    if (!result) {
+      throw new InternalServerError(
+        `an error has ocurred trying to save a new model`
+      );
+    } else {
+      return result;
+    }
   }
 
   // test
   /**
    * uploadFile
    */
+  /*
   @POST
   @Path("upload")
   public uploadFile(@FileParam("cocoFile") file: Express.Multer.File) {
     logger.debug(`File: ${JSON.stringify(file)}`);
-  }
+  }*/
 
   /**
    *

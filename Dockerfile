@@ -16,6 +16,10 @@ RUN npm install
 COPY ./dist ./dist
 COPY ./.env ./.env
 
+# create logs folders
+RUN mkdir -p logs
+
+
 EXPOSE 3000
 CMD [ "npm", "run", "start:in:docker" ]
 
