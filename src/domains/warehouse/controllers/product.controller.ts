@@ -21,6 +21,7 @@ import { ProductItemDto } from "../../../models/warehouse/dtos/product-item.dto"
 import { ProductValidatorMiddleware } from "../middlewares/product-validator.middleware";
 import { NewResource } from "typescript-rest/dist/server/model/return-types";
 import { ProductInstanceService } from "../services/product-instance.service";
+import { ProductModelDto } from "../../../models/warehouse/dtos/product-model.dto";
 
 @Tags("Product")
 @Path("/warehouse/product")
@@ -83,6 +84,16 @@ export class ProductController {
       logger.error(`ProductController:addNewProduct ${err}`);
       throw new InternalServerError(`${err}`);
     }
+  }
+
+  /**
+   * addNewProductModel
+   * @param productModelDto
+   */
+  @POST
+  @Path("/newModel/:id")
+  public async addNewProductModel(productModelDto: ProductModelDto) {
+    
   }
 
   // test
