@@ -4,10 +4,10 @@ import { Product } from "../../../models/warehouse/product.model";
 import { ProductDto } from "../../../models/warehouse/dtos/product.dto";
 import { DatabaseConnection } from "../../../database.connection";
 import { UuIdGenerator } from "../helpers/uuid-generator.helper";
-import { Spec } from "../../../models/warehouse/spec.model";
-import { ProductSpecs } from "../../../models/warehouse/product-specs.model";
+// import { Spec } from "../../../models/warehouse/spec.model";
+// import { ProductSpecs } from "../../../models/warehouse/product-specs.model";
 import { logger } from "../../../common/logger";
-import { SpecProduct } from "../../../models/warehouse/dtos/spec-product.dto";
+// import { SpecProduct } from "../../../models/warehouse/dtos/spec-product.dto";
 import { ProductItemDto } from "../../../models/warehouse/dtos/product-item.dto";
 import { ProductInstance } from "../../../models/warehouse/product-instance.model";
 import { Inject } from "typescript-ioc";
@@ -17,8 +17,8 @@ export class ProductService implements ModelServiceAbstract {
   @Inject productInstanceService: ProductInstanceService;
 
   private productRepository: Repository<Product>;
-  private specRepository: Repository<Spec>;
-  private productSpecRepository: Repository<ProductSpecs>;
+  // private specRepository: Repository<Spec>;
+  // private productSpecRepository: Repository<ProductSpecs>;
   private productInstanceRespository: Repository<ProductInstance>;
   private db: DatabaseConnection;
 
@@ -28,15 +28,13 @@ export class ProductService implements ModelServiceAbstract {
     this.db = new DatabaseConnection();
     const sequelize = this.db.database;
     this.productRepository = sequelize.getRepository(Product);
-    this.specRepository = sequelize.getRepository(Spec);
-    this.productSpecRepository = sequelize.getRepository(ProductSpecs);
+    // this.specRepository = sequelize.getRepository(Spec);
+    // this.productSpecRepository = sequelize.getRepository(ProductSpecs);
     this.productInstanceRespository = sequelize.getRepository(ProductInstance);
   }
 
   public async findAll(): Promise<any> {
-    const result = await this.productRepository.findAll({
-      include: [this.specRepository],
-    });
+    const result = await this.productRepository.findAll();
     return result;
   }
 
@@ -54,14 +52,16 @@ export class ProductService implements ModelServiceAbstract {
 
       logger.debug(` ${logMessage} ${JSON.stringify(result)}`);
 
-      // add specs
-      this.addSpecs(result.id, product.specs);
-
       return result;
     } catch (err) {
       logger.error(`${logMessage} -> ${err}`);
     }
   }
+
+  /*
+
+  Add specs will to save on PordcuctModel
+
   private addSpecs(productId: string, specs: SpecProduct[]): void {
     specs.forEach(async (spec) => {
       const findResult: Spec = await await this.specRepository.findOne<Spec>({
@@ -88,6 +88,7 @@ export class ProductService implements ModelServiceAbstract {
       }
     });
   }
+  */
 
   public async findById<String>(id: String): Promise<any> {
     let result = await this.productRepository.findOne({ where: { id: id } });

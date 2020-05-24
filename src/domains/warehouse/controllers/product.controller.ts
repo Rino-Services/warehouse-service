@@ -1,4 +1,12 @@
-import { Path, PathParam, GET, POST, PreProcessor, PUT } from "typescript-rest";
+import {
+  Path,
+  PathParam,
+  GET,
+  POST,
+  PreProcessor,
+  PUT,
+  FileParam,
+} from "typescript-rest";
 import { Inject } from "typescript-ioc";
 import { ProductService } from "../services/product.service";
 import { ProductDto } from "../../../models/warehouse/dtos/product.dto";
@@ -10,7 +18,7 @@ import {
 import { Tags } from "typescript-rest-swagger";
 import { logger } from "../../../common/logger";
 import { ProductItemDto } from "../../../models/warehouse/dtos/product-item.dto";
-import { ProductValidatorMiddleware } from "../middlewares/product-validator.middleware copy";
+import { ProductValidatorMiddleware } from "../middlewares/product-validator.middleware";
 import { NewResource } from "typescript-rest/dist/server/model/return-types";
 import { ProductInstanceService } from "../services/product-instance.service";
 
@@ -75,6 +83,16 @@ export class ProductController {
       logger.error(`ProductController:addNewProduct ${err}`);
       throw new InternalServerError(`${err}`);
     }
+  }
+
+  // test
+  /**
+   * uploadFile
+   */
+  @POST
+  @Path("upload")
+  public uploadFile(@FileParam("cocoFile") file: Express.Multer.File) {
+    logger.debug(`File: ${JSON.stringify(file)}`);
   }
 
   /**

@@ -6,11 +6,10 @@ export class ProductModelValidator {
   private static readonly mainSchema: Joi.ObjectSchema = Joi.object().keys({
     id: Joi.string().empty(),
     title: Joi.string().max(100).required(),
-    model: Joi.string().max(100).required(),
+    baseImageUrl: Joi.string(),
     description: Joi.string().empty(),
     brandId: Joi.string().required(),
     supplierId: Joi.string().required(),
-    specs: Joi.array(),
   });
 
   private static readonly productItemSchema: Joi.ObjectSchema = Joi.object().keys(

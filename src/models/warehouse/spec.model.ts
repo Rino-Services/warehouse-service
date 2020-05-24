@@ -8,7 +8,7 @@ import {
   BelongsToMany,
 } from "sequelize-typescript";
 import { ProductSpecs } from "./product-specs.model";
-import { Product } from "./product.model";
+import { ProductModel } from "./product-model.model";
 
 @Table
 export class Spec extends Model<Spec> {
@@ -24,6 +24,6 @@ export class Spec extends Model<Spec> {
   @DeletedAt
   deletionDate: Date;
 
-  @BelongsToMany(() => Product, () => ProductSpecs)
-  products: Product[];
+  @BelongsToMany(() => ProductModel, () => ProductSpecs)
+  productsModels: ProductModel[];
 }

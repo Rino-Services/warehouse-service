@@ -9,7 +9,6 @@ import {
   BelongsTo,
   BelongsToMany,
 } from "sequelize-typescript";
-import { Product } from "./product.model";
 import { WarehouseStatus } from "./warehouse-status.model";
 import { ItemStatuses } from "./item-status.model";
 import { ProductModel } from "./product-model.model";

@@ -9,6 +9,7 @@ import {
   BelongsTo,
   BelongsToMany,
   HasMany,
+  PrimaryKey,
 } from "sequelize-typescript";
 import { Product } from "./product.model";
 import { ProductInstance } from "./product-instance.model";
@@ -17,6 +18,7 @@ import { ProductSpecs } from "./product-specs.model";
 
 @Table
 export class ProductModel extends Model<ProductModel> {
+  @PrimaryKey
   @Column
   id: string;
 
