@@ -1,4 +1,4 @@
-import { Path, PathParam, POST, FilesParam } from "typescript-rest";
+import { Path, PathParam, POST, FileParam } from "typescript-rest";
 import { Tags } from "typescript-rest-swagger";
 import { Inject } from "typescript-ioc";
 import { ProductModelService } from "../services/product-model.service";
@@ -11,16 +11,19 @@ export class ProductModelController {
 
   @Inject productModelService: ProductModelService;
 
-  /**
-   *
-   * @param productId Product Id ->uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
-   * @param productModelId Product Model Id -> uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
-   * @param productModelPhotos[] array of files to upload
-   */
+ 
   @POST
   @Path("/marketing/:productModelId")
-  public async marketingPhotos(
+  public async marketing(
     @PathParam("productModelId") productModelId: string,
-    @FilesParam("productModelPhotos[]") files: Array<Express.Multer.File>
+    @FileParam("facebookPubImage") facebookPubImage: Express.Multer.File,
+    @FileParam("instagramPubImage") instagramPubImage: Express.Multer.File,
+    @FileParam("Three60FrontPubImage")
+    Three60FrontPubImage: Express.Multer.File,
+    @FileParam("Three60LeftPubImage") Three60LeftPubImage: Express.Multer.File,
+    @FileParam("Three60RightPubImage")
+    Three60RightPubImage: Express.Multer.File,
+    @FileParam("Three60TopPubImage") Three60TopPubImage: Express.Multer.File,
+    @FileParam("Three60BackPubImage") Three60BackPubImage: Express.Multer.File,
   ) {}
 }
