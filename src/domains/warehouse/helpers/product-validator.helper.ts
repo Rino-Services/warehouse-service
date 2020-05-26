@@ -25,7 +25,7 @@ export class ProductModelValidator {
     {
       costPrice: Joi.number().greater(0).required(),
       description: Joi.string().required(),
-      unitPrice: Joi.number().greater(0).required(),
+      percentageApplied: Joi.number().greater(-1).required(),
     }
   );
 

@@ -19,9 +19,6 @@ export class PriceHistory extends Model<PriceHistory> {
   percentageApplied: number;
 
   @Column
-  differencePrice: number;
-
-  @Column
   oldPrice: number;
 
   @Column

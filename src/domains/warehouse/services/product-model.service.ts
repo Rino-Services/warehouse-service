@@ -5,8 +5,12 @@ import { DatabaseConnection } from "../../../database.connection";
 import { logger } from "../../../common/logger";
 import { ProductModelDto } from "../../../models/warehouse/dtos/product-model.dto";
 import { UuIdGenerator } from "../helpers/uuid-generator.helper";
+import { Inject } from "typescript-ioc";
+import { PriceHistoryService } from "./price-history.service";
+import { PriceHistoryDto } from "../../../models/warehouse/dtos/price-history.dto";
 
 export class ProductModelService implements ModelServiceAbstract {
+  @Inject priceHistoryService: PriceHistoryService;
   private productModelRepository: Repository<ProductModel>;
   private db: DatabaseConnection;
 
@@ -25,7 +29,7 @@ export class ProductModelService implements ModelServiceAbstract {
     const logMessage: string = `${this.logScopeMessage} addNew ->`;
 
     try {
-      const result = await this.productModelRepository.create({
+      const result: ProductModel = await this.productModelRepository.create({
         id: UuIdGenerator.generate(),
         costPrice: model.dto.costPrice,
         description: model.dto.description,
@@ -35,8 +39,23 @@ export class ProductModelService implements ModelServiceAbstract {
       logger.debug(`${logMessage} ${JSON.stringify(result)}`);
 
       // add unit price -> to priceHistory
+      if (result) {
+        const priceHistoryDto: PriceHistoryDto = {
+          price: 0,
+          percentageApplied: model.dto.percentageApplied,
+          oldPrice: model.dto.costPrice,
+          productModelId: result.id,
+          isCurrent: true,
+        };
+        const priceHistoryResult = await this.priceHistoryService.addNew(
+          priceHistoryDto
+        );
 
-      return result;
+        if (priceHistoryResult) {
+          result.priceHistory = [priceHistoryResult];
+        }
+        return result;
+      }
     } catch (err) {
       logger.error(`${logMessage} ${JSON.stringify(err)}`);
       return null;

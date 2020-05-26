@@ -1,5 +1,5 @@
 export class ProductModelDto {
   costPrice: number;
-  unitPrice: number;
+  percentageApplied: number;
   description: string;
 }
