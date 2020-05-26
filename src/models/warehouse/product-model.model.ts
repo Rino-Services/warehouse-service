@@ -15,6 +15,7 @@ import { Product } from "./product.model";
 import { ProductInstance } from "./product-instance.model";
 import { Spec } from "./spec.model";
 import { ProductSpecs } from "./product-specs.model";
+import { PriceHistory } from "./price-history.model";
 
 @Table
 export class ProductModel extends Model<ProductModel> {
@@ -52,4 +53,7 @@ export class ProductModel extends Model<ProductModel> {
 
   @BelongsToMany(() => Spec, () => ProductSpecs)
   specs: Spec[];
+
+  @HasMany(() => PriceHistory)
+  priceHistory: PriceHistory[];
 }

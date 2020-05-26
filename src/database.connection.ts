@@ -14,6 +14,7 @@ import { ProductCategory } from "./models/warehouse/product-category.model";
 import { ItemStatuses } from "./models/warehouse/item-status.model";
 import { WarehouseStatus } from "./models/warehouse/warehouse-status.model";
 import { ProductModel } from "./models/warehouse/product-model.model";
+import { PriceHistory } from "./models/warehouse/price-history.model";
 
 export class DatabaseConnection {
   public database: Sequelize;
@@ -55,6 +56,7 @@ export class DatabaseConnection {
         ProductSpecs,
         WarehouseStatus,
         ItemStatuses,
+        PriceHistory,
       ], // or [Player, Team],
     });
   }

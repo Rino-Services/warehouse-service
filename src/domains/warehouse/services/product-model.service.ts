@@ -33,6 +33,9 @@ export class ProductModelService implements ModelServiceAbstract {
       });
 
       logger.debug(`${logMessage} ${JSON.stringify(result)}`);
+
+      // add unit price -> to priceHistory
+
       return result;
     } catch (err) {
       logger.error(`${logMessage} ${JSON.stringify(err)}`);
