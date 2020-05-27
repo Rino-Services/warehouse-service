@@ -9,6 +9,7 @@ import { Inject } from "typescript-ioc";
 import { PriceHistoryService } from "./price-history.service";
 import { PriceHistoryDto } from "../../../models/warehouse/dtos/price-history.dto";
 import { PriceHistory } from "../../../models/warehouse/price-history.model";
+import { Spec } from "../../../models/warehouse/spec.model";
 
 export class ProductModelService implements ModelServiceAbstract {
   @Inject priceHistoryService: PriceHistoryService;
@@ -16,6 +17,7 @@ export class ProductModelService implements ModelServiceAbstract {
   private db: DatabaseConnection;
 
   private priceHistoryRepository: Repository<PriceHistory>;
+  private readonly specRepository: Repository<Spec>;
 
   private readonly logScopeMessage: string = "ProductModelService :: ";
 
@@ -24,6 +26,7 @@ export class ProductModelService implements ModelServiceAbstract {
     const sequelize = this.db.database;
     this.productModelRepository = sequelize.getRepository(ProductModel);
     this.priceHistoryRepository = sequelize.getRepository(PriceHistory);
+    this.specRepository = sequelize.getRepository(Spec);
   }
 
   public async addNew(model: {
@@ -56,7 +59,7 @@ export class ProductModelService implements ModelServiceAbstract {
         );
 
         if (priceHistoryResult) {
-          result.priceHistory = [priceHistoryResult];
+          result.priceHistory.push(priceHistoryResult);
         }
         return result;
       }
@@ -74,15 +77,19 @@ export class ProductModelService implements ModelServiceAbstract {
       where: {
         productId: productId,
       },
-      include: [this.priceHistoryRepository],
+      include: [this.priceHistoryRepository, this.specRepository],
     });
 
     logger.debug(`${result}`);
     return result;
   }
 
-  findById<T>(id: T): Promise<any> {
-    throw new Error("Method not implemented.");
+  public async findById<T>(id: T): Promise<any> {
+    return await this.productModelRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
   }
   public async findAll(): Promise<any> {
     const logMessage: string = `${this.logScopeMessage} findAll ->`;

@@ -16,9 +16,7 @@ import { ProductInstanceService } from "./product-instance.service";
 export class ProductService implements ModelServiceAbstract {
   @Inject productInstanceService: ProductInstanceService;
 
-  private productRepository: Repository<Product>;
-  // private specRepository: Repository<Spec>;
-  // private productSpecRepository: Repository<ProductSpecs>;
+  private productRepository: Repository<Product>;    
   private productInstanceRespository: Repository<ProductInstance>;
   private db: DatabaseConnection;
 
@@ -28,8 +26,6 @@ export class ProductService implements ModelServiceAbstract {
     this.db = new DatabaseConnection();
     const sequelize = this.db.database;
     this.productRepository = sequelize.getRepository(Product);
-    // this.specRepository = sequelize.getRepository(Spec);
-    // this.productSpecRepository = sequelize.getRepository(ProductSpecs);
     this.productInstanceRespository = sequelize.getRepository(ProductInstance);
   }
 
@@ -56,39 +52,7 @@ export class ProductService implements ModelServiceAbstract {
     } catch (err) {
       logger.error(`${logMessage} -> ${err}`);
     }
-  }
-
-  /*
-
-  Add specs will to save on PordcuctModel
-
-  private addSpecs(productId: string, specs: SpecProduct[]): void {
-    specs.forEach(async (spec) => {
-      const findResult: Spec = await await this.specRepository.findOne<Spec>({
-        where: { title: spec.title },
-      });
-      if (findResult) {
-        await this.productSpecRepository.create({
-          value: spec.value,
-          productId,
-          specId: findResult.id,
-        });
-      } else {
-        const specResult: Spec = await this.specRepository.create({
-          title: spec.title,
-        });
-
-        if (specResult) {
-          await this.productSpecRepository.create({
-            value: spec.value,
-            productId,
-            specId: specResult.id,
-          });
-        }
-      }
-    });
-  }
-  */
+  }  
 
   public async findById<String>(id: String): Promise<any> {
     let result = await this.productRepository.findOne({ where: { id: id } });

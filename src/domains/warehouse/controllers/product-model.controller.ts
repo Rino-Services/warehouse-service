@@ -2,6 +2,9 @@ import { Path, PathParam, POST, FileParam } from "typescript-rest";
 import { Tags } from "typescript-rest-swagger";
 import { Inject } from "typescript-ioc";
 import { ProductModelService } from "../services/product-model.service";
+import { ProductModelRequestValidatorMiddleware } from "../middlewares/product-model-validator.middleware";
+import { SpecProduct } from "../../../models/warehouse/dtos/spec-product.dto";
+import { SpecService } from "../services/spec.service";
 
 @Tags("Product-Model")
 @Path("warehouse/:productId/product-model")
@@ -10,6 +13,9 @@ export class ProductModelController {
   productId: string;
 
   @Inject productModelService: ProductModelService;
+  @Inject specService: SpecService;
+  @Inject
+  private productModelRequestValidatorMiddleware: ProductModelRequestValidatorMiddleware;
 
   /**
    *
@@ -36,4 +42,26 @@ export class ProductModelController {
     @FileParam("Three60TopPubImage") Three60TopPubImage: Express.Multer.File,
     @FileParam("Three60BackPubImage") Three60BackPubImage: Express.Multer.File
   ) {}
+
+  /**
+   *
+   * @param productModelId uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
+   * @param specs array of value pair: [{title: "Color", value: "black"}, {title: "Texture", value: "soft"}]
+   */
+  @POST
+  @Path("/add-specs/:productModelId")
+  public async addSpecs(
+    @PathParam("productModelId") productModelId: string,
+    specs: Array<SpecProduct>
+  ) {
+    // like a preprocesor
+    this.productModelRequestValidatorMiddleware.validateProductModelId(
+      productModelId
+    );
+
+    this.productModelRequestValidatorMiddleware.validateSpecs(specs);
+
+    this.specService.addSpecs(productModelId, specs);
+    return true;
+  }
 }
