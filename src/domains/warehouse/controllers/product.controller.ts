@@ -64,6 +64,15 @@ export class ProductController {
     }
   }
 
+  @GET
+  @Path("/all-product-models/:productId")
+  @PreProcessor(ProductValidatorMiddleware.vaidateProductId)
+  public async getAllProductModelByProduct0(
+    @PathParam("productId") productId: string
+  ) {
+    return await this.productModelService.getAllByProductId(productId);
+  }
+
   /**
    *
    * @param productToAdd

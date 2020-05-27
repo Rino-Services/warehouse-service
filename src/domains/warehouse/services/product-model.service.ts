@@ -8,11 +8,14 @@ import { UuIdGenerator } from "../helpers/uuid-generator.helper";
 import { Inject } from "typescript-ioc";
 import { PriceHistoryService } from "./price-history.service";
 import { PriceHistoryDto } from "../../../models/warehouse/dtos/price-history.dto";
+import { PriceHistory } from "../../../models/warehouse/price-history.model";
 
 export class ProductModelService implements ModelServiceAbstract {
   @Inject priceHistoryService: PriceHistoryService;
   private productModelRepository: Repository<ProductModel>;
   private db: DatabaseConnection;
+
+  private priceHistoryRepository: Repository<PriceHistory>;
 
   private readonly logScopeMessage: string = "ProductModelService :: ";
 
@@ -20,6 +23,7 @@ export class ProductModelService implements ModelServiceAbstract {
     this.db = new DatabaseConnection();
     const sequelize = this.db.database;
     this.productModelRepository = sequelize.getRepository(ProductModel);
+    this.priceHistoryRepository = sequelize.getRepository(PriceHistory);
   }
 
   public async addNew(model: {
@@ -61,6 +65,22 @@ export class ProductModelService implements ModelServiceAbstract {
       return null;
     }
   }
+
+  /**
+   * getAllByProductId
+   */
+  public async getAllByProductId(productId: string) {
+    const result = await this.productModelRepository.findAll({
+      where: {
+        productId: productId,
+      },
+      include: [this.priceHistoryRepository],
+    });
+
+    logger.debug(`${result}`);
+    return result;
+  }
+
   findById<T>(id: T): Promise<any> {
     throw new Error("Method not implemented.");
   }
