@@ -27,18 +27,17 @@ export class PriceHistoryService implements ModelServiceAbstract {
       );
       // is the firstOne? (is firstone when result set comes null/empty),
       if (!currentPrice) {
-        
         const result = await this.priceHistoryRepository.create({
           price: this.setNewPrice(0, priceHistoryDto.oldPrice), // price: set as default price
           percentageApplied: priceHistoryDto.percentageApplied, // percentageApplied: 0
           oldPrice: priceHistoryDto.oldPrice, // oldPrice: costPrice
           isCurrent: true, // isCurrent: true
+          productModelId: priceHistoryDto.productModelId,
         });
 
         logger.debug(`${result}`);
         return result;
       } else {
-        
         const result = await this.priceHistoryRepository.create({
           price: this.setNewPrice(
             priceHistoryDto.percentageApplied,
@@ -47,6 +46,7 @@ export class PriceHistoryService implements ModelServiceAbstract {
           percentageApplied: priceHistoryDto.percentageApplied, // percentageApplied: 0
           oldPrice: currentPrice.price, // oldPrice: costPrice
           isCurrent: true, // isCurrent: true
+          productModelId: priceHistoryDto.productModelId,
         });
 
         // update oldPrice, isCurrent = false
