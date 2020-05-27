@@ -54,13 +54,8 @@ export class ProductModelService implements ModelServiceAbstract {
           productModelId: result.id,
           isCurrent: true,
         };
-        const priceHistoryResult = await this.priceHistoryService.addNew(
-          priceHistoryDto
-        );
+        await this.priceHistoryService.addNew(priceHistoryDto);
 
-        if (priceHistoryResult) {
-          result.priceHistory.push(priceHistoryResult);
-        }
         return result;
       }
     } catch (err) {

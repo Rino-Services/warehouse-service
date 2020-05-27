@@ -88,6 +88,6 @@ export class PriceHistoryService implements ModelServiceAbstract {
   }
 
   private setNewPrice(percentageApplied: number, oldPrice: number): number {
-    return oldPrice * percentageApplied + oldPrice;
+    return (oldPrice * percentageApplied) / 100 + oldPrice;
   }
 }
