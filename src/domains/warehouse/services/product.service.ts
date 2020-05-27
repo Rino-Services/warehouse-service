@@ -4,20 +4,14 @@ import { Product } from "../../../models/warehouse/product.model";
 import { ProductDto } from "../../../models/warehouse/dtos/product.dto";
 import { DatabaseConnection } from "../../../database.connection";
 import { UuIdGenerator } from "../helpers/uuid-generator.helper";
-// import { Spec } from "../../../models/warehouse/spec.model";
-// import { ProductSpecs } from "../../../models/warehouse/product-specs.model";
 import { logger } from "../../../common/logger";
-// import { SpecProduct } from "../../../models/warehouse/dtos/spec-product.dto";
-import { ProductItemDto } from "../../../models/warehouse/dtos/product-item.dto";
-import { ProductInstance } from "../../../models/warehouse/product-instance.model";
 import { Inject } from "typescript-ioc";
 import { ProductInstanceService } from "./product-instance.service";
 
 export class ProductService implements ModelServiceAbstract {
   @Inject productInstanceService: ProductInstanceService;
 
-  private productRepository: Repository<Product>;    
-  private productInstanceRespository: Repository<ProductInstance>;
+  private productRepository: Repository<Product>;
   private db: DatabaseConnection;
 
   private readonly logScopeMessage: string = "ProductService :: ";
@@ -26,7 +20,6 @@ export class ProductService implements ModelServiceAbstract {
     this.db = new DatabaseConnection();
     const sequelize = this.db.database;
     this.productRepository = sequelize.getRepository(Product);
-    this.productInstanceRespository = sequelize.getRepository(ProductInstance);
   }
 
   public async findAll(): Promise<any> {
@@ -52,7 +45,7 @@ export class ProductService implements ModelServiceAbstract {
     } catch (err) {
       logger.error(`${logMessage} -> ${err}`);
     }
-  }  
+  }
 
   public async findById<String>(id: String): Promise<any> {
     let result = await this.productRepository.findOne({ where: { id: id } });
@@ -61,48 +54,5 @@ export class ProductService implements ModelServiceAbstract {
 
   public update<String>(id: String, product: ProductDto): Promise<any> {
     throw new Error("Method not implemented.");
-  }
-
-  public async addNewProductsItems(
-    productId: string,
-    itemsToAdd: ProductItemDto
-  ): Promise<boolean> {
-    const logMessage: string = `${this.logScopeMessage} -> `;
-
-    try {
-      const product = await this.productRepository.findOne({
-        where: { id: productId },
-      });
-      if (product) {
-        itemsToAdd.serialNumbers.forEach(async (item) => {
-          // validate that serial number does not exist
-          if (
-            !(await this.productInstanceRespository.findOne({
-              where: { serialNumber: item },
-            }))
-          ) {
-            const itemSaved: ProductInstance = await this.productInstanceRespository.create(
-              {
-                serialNumber: item,
-                productId,
-              }
-            );
-
-            if (itemSaved) {
-              await this.productInstanceService.setStatus(
-                [itemSaved.serialNumber],
-                productId,
-                "STRG"
-              );
-            }
-          }
-        });
-      }
-
-      return true;
-    } catch (err) {
-      logger.error(`${logMessage} ${err}`);
-      return false;
-    }
   }
 }

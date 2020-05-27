@@ -5,13 +5,12 @@ import { ProductModelService } from "../services/product-model.service";
 import { ProductModelRequestValidatorMiddleware } from "../middlewares/product-model-validator.middleware";
 import { SpecProduct } from "../../../models/warehouse/dtos/spec-product.dto";
 import { SpecService } from "../services/spec.service";
+import { NewResource } from "typescript-rest/dist/server/model/return-types";
+import { InternalServerError } from "typescript-rest/dist/server/model/errors";
 
 @Tags("Product-Model")
-@Path("warehouse/:productId/product-model")
+@Path("warehouse/product-model")
 export class ProductModelController {
-  @PathParam("productId")
-  productId: string;
-
   @Inject productModelService: ProductModelService;
   @Inject specService: SpecService;
   @Inject
@@ -63,5 +62,37 @@ export class ProductModelController {
 
     this.specService.addSpecs(productModelId, specs);
     return true;
+  }
+
+  /**
+   *
+   * @param productId uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
+   * @param itemsToAdd model thats contains items to add
+   */
+  @POST
+  @Path("/:productModelId/addProductItems")
+  public async addProductItems(
+    @PathParam("productModelId") productModelId: string,
+    itemsToAdd: Array<string>
+  ) {
+    // like a preprocesor
+    this.productModelRequestValidatorMiddleware.validateProductModelId(
+      productModelId
+    );
+
+    this.productModelRequestValidatorMiddleware.validateItems(itemsToAdd);
+
+    const result = await this.productModelService.addNewProductsItems(
+      productModelId,
+      itemsToAdd
+    );
+
+    if (result) {
+      return new NewResource<void>("");
+    } else {
+      throw new InternalServerError(
+        `An error has occuerd while trying to store the information, try agian`
+      );
+    }
   }
 }

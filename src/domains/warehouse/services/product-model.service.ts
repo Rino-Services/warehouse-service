@@ -10,9 +10,13 @@ import { PriceHistoryService } from "./price-history.service";
 import { PriceHistoryDto } from "../../../models/warehouse/dtos/price-history.dto";
 import { PriceHistory } from "../../../models/warehouse/price-history.model";
 import { Spec } from "../../../models/warehouse/spec.model";
+import { ProductInstanceService } from "./product-instance.service";
+import { ProductInstance } from "../../../models/warehouse/product-instance.model";
 
 export class ProductModelService implements ModelServiceAbstract {
   @Inject priceHistoryService: PriceHistoryService;
+  @Inject productInstanceService: ProductInstanceService;
+
   private productModelRepository: Repository<ProductModel>;
   private db: DatabaseConnection;
 
@@ -77,6 +81,49 @@ export class ProductModelService implements ModelServiceAbstract {
 
     logger.debug(`${result}`);
     return result;
+  }
+
+  public async addNewProductsItems(
+    productModelId: string,
+    itemsToAdd: Array<string>
+  ): Promise<boolean> {
+    const logMessage: string = `${this.logScopeMessage} -> `;
+
+    try {
+      const product = await this.productModelRepository.findOne({
+        where: { id: productModelId },
+      });
+      if (product) {
+        itemsToAdd.forEach(async (item) => {
+          // validate that serial number does not exist
+          if (
+            !(await this.productInstanceService.find({
+              where: { serialNumber: item },
+            }))
+          ) {
+            const itemSaved: ProductInstance = await this.productInstanceService.addNew(
+              {
+                productModelId,
+                serialNumber: item,
+              }
+            );
+
+            if (itemSaved) {
+              await this.productInstanceService.setStatus(
+                [itemSaved.serialNumber],
+                productModelId,
+                "STRG"
+              );
+            }
+          }
+        });
+      }
+
+      return true;
+    } catch (err) {
+      logger.error(`${logMessage} ${err}`);
+      return false;
+    }
   }
 
   public async findById<T>(id: T): Promise<any> {

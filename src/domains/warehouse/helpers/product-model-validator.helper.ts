@@ -5,6 +5,13 @@ export class ProductModelRequestValidatorHelper {
   private static readonly productModelIdSchema: Joi.StringSchema = Joi.string()
     .required()
     .uuid();
+  private static readonly itemsSchema: Joi.ArraySchema = Joi.array().required();
+
+  public static validateProductModelId(
+    productModelId: string
+  ): Joi.ValidationResult<any> {
+    return Joi.validate(productModelId, this.productModelIdSchema);
+  }
 
   public static validateSpecs(
     specs: Array<SpecProduct>
@@ -12,9 +19,9 @@ export class ProductModelRequestValidatorHelper {
     return Joi.validate(specs, this.specsSchema);
   }
 
-  public static validateProductModelId(
-    productModelId: string
+  public static validateItems(
+    itemsToAdd: Array<string>
   ): Joi.ValidationResult<any> {
-    return Joi.validate(productModelId, this.productModelIdSchema);
+    return Joi.validate(itemsToAdd, this.itemsSchema);
   }
 }

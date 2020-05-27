@@ -17,9 +17,7 @@ import {
 } from "typescript-rest/dist/server/model/errors";
 import { Tags } from "typescript-rest-swagger";
 import { logger } from "../../../common/logger";
-import { ProductItemDto } from "../../../models/warehouse/dtos/product-item.dto";
 import { ProductValidatorMiddleware } from "../middlewares/product-validator.middleware";
-import { NewResource } from "typescript-rest/dist/server/model/return-types";
 import { ProductInstanceService } from "../services/product-instance.service";
 import { ProductModelDto } from "../../../models/warehouse/dtos/product-model.dto";
 import { ProductModelService } from "../services/product-model.service";
@@ -134,32 +132,6 @@ export class ProductController {
   public uploadFile(@FileParam("cocoFile") file: Express.Multer.File) {
     logger.debug(`File: ${JSON.stringify(file)}`);
   }*/
-
-  /**
-   *
-   * @param productId uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
-   * @param itemsToAdd model thats contains items to add
-   */
-  @POST
-  @Path("/:productId/addProductItems")
-  @PreProcessor(ProductValidatorMiddleware.vaidateProductId)
-  @PreProcessor(ProductValidatorMiddleware.validateProductItems)
-  public async addProductItems(
-    @PathParam("productId") productId: string,
-    itemsToAdd: ProductItemDto
-  ) {
-    const result = await this.productService.addNewProductsItems(
-      productId,
-      itemsToAdd
-    );
-    if (result) {
-      return new NewResource<void>("");
-    } else {
-      throw new InternalServerError(
-        `An error has occuerd while trying to store the information, try agian`
-      );
-    }
-  }
 
   /**
    *

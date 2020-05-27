@@ -6,19 +6,23 @@ import { DatabaseConnection } from "../../../database.connection";
 import { WarehouseStatus } from "../../../models/warehouse/warehouse-status.model";
 import { ItemStatuses } from "../../../models/warehouse/item-status.model";
 import { logger } from "../../../common/logger";
-import { AddnewProductEnQueueMessage } from "../aws/sns/addnew-product-enqueue.message";
+
+/*
 import { Product } from "../../../models/warehouse/product.model";
+import { AddnewProductEnQueueMessage } from "../aws/sns/addnew-product-enqueue.message";
 import { NewProductMessageAttrs } from "../aws/sns/dtos/newproduct-message-attributes.dto";
 import { MessageMetaData } from "../../../common/models/metadata-message-attributes.model";
 import { UpdateProductMessageAttrs } from "../aws/sns/dtos/updateproduct-message-attributes.dto";
 import { IEnqueueMessage } from "../../../common/aws/sns/EnqueueMessage";
 import { UpdateProductEnQueueMessage } from "../aws/sns/update-product-store-enqueue.message";
+import { ProductModel } from "../../../models/warehouse/product-model.model";
+*/
 
 export class ProductInstanceService implements ModelServiceAbstract {
   private readonly productInstanceRepository: Repository<ProductInstance>;
   private readonly itemStatusesRepository: Repository<ItemStatuses>;
   private readonly warehouseStatusesRepository: Repository<WarehouseStatus>;
-  private readonly productRepository: Repository<Product>;
+  // private readonly productRepository: Repository<Product>;
   private readonly db: DatabaseConnection;
   private readonly logMessage: string = "ProductInstanceService :: ";
   private readonly sequelize: Sequelize;
@@ -33,12 +37,24 @@ export class ProductInstanceService implements ModelServiceAbstract {
     this.warehouseStatusesRepository = this.sequelize.getRepository(
       WarehouseStatus
     );
-    this.productRepository = this.sequelize.getRepository(Product);
+    // this.productRepository = this.sequelize.getRepository(Product);
   }
-  addNew(modelDto: any): Promise<any> {
-    throw new Error("Method not implemented.");
+  public async addNew(modelDto: {
+    productModelId: string;
+    serialNumber: string;
+  }): Promise<any> {
+    const result = await this.productInstanceRepository.create({
+      productModelId: modelDto.productModelId,
+      serialNumber: modelDto.serialNumber,
+    });
+    return result;
   }
-  findById<T>(id: T): Promise<any> {
+
+  public async find(criteria: any) {
+    return this.productInstanceRepository.findOne(criteria);
+  }
+
+  public async findById<T>(id: T): Promise<any> {
     throw new Error("Method not implemented.");
   }
   findAll(): Promise<any> {
@@ -50,7 +66,7 @@ export class ProductInstanceService implements ModelServiceAbstract {
 
   public async setStatus(
     serialNumbers: Array<string>,
-    productId: string,
+    productModelId: string,
     statusCode: string
   ): Promise<number> {
     let result: number = 0;
@@ -59,7 +75,7 @@ export class ProductInstanceService implements ModelServiceAbstract {
         {
           where: {
             serialNumber: serialNumbers,
-            productId,
+            productModelId,
           },
         }
       );
@@ -84,7 +100,7 @@ export class ProductInstanceService implements ModelServiceAbstract {
       });
 
       logger.info(`${this.logMessage} setStatus -> ${result} result added`);
-      await this.publishProductChanges(productId, statusCode, result);
+      // await this.publishProductChanges(productModelId, statusCode, result);
     } catch (err) {
       logger.error(`${this.logMessage} setStatus -> ${err}`);
 
@@ -120,8 +136,9 @@ export class ProductInstanceService implements ModelServiceAbstract {
     return result;
   }
 
+  /*
   private async publishProductChanges(
-    productId: string,
+    productModelId: string,
     status: string,
     qty: number
   ): Promise<boolean> {
@@ -130,8 +147,8 @@ export class ProductInstanceService implements ModelServiceAbstract {
     try {
       let enqueueMessage: IEnqueueMessage;
 
-      const product: Product = await this.productRepository.findOne({
-        where: { id: productId },
+      const product: ProductModel = await this.productRepository.findOne({
+        where: { id: productModelId },
       });
 
       logger.debug(
@@ -172,7 +189,7 @@ export class ProductInstanceService implements ModelServiceAbstract {
             } else {
               const newProductMessageAttr: NewProductMessageAttrs = {
                 ProductId: new MessageMetaData("String", product.id),
-                ProductTitle: new MessageMetaData("String", product.title),      
+                ProductTitle: new MessageMetaData("String", product.title),
                 ProductDescription: new MessageMetaData(
                   "String",
                   product.description
@@ -266,4 +283,6 @@ export class ProductInstanceService implements ModelServiceAbstract {
       return resultTran;
     }
   }
+
+  */
 }

@@ -19,6 +19,15 @@ export class ProductModelRequestValidatorMiddleware {
     this.validationHandler.badRequestResponse(functionName, validationResult);
   }
 
+  public validateItems(itemsToAdd: Array<string>): void {
+    const functionName: string = "validateItems";
+    const validationResult: Joi.ValidationResult<any> = ProductModelRequestValidatorHelper.validateItems(
+      itemsToAdd
+    );
+
+    this.validationHandler.badRequestResponse(functionName, validationResult);
+  }
+
   public validateProductModelId(productModelId: string): void {
     const functionName: string = "validateProductModelId";
     const validationResult: Joi.ValidationResult<any> = ProductModelRequestValidatorHelper.validateProductModelId(
