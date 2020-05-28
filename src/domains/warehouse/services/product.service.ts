@@ -52,7 +52,10 @@ export class ProductService implements ModelServiceAbstract {
     return result;
   }
 
-  public update<String>(id: String, product: ProductDto): Promise<any> {
-    throw new Error("Method not implemented.");
+  public async update<String>(id: String, criteria: any): Promise<any> {
+    return await this.productRepository.update(
+      criteria.values,
+      criteria.options
+    );
   }
 }

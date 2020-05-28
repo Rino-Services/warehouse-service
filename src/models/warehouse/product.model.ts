@@ -9,11 +9,13 @@ import {
   BelongsTo,
   ForeignKey,
   BelongsToMany,
+  HasMany,
 } from "sequelize-typescript";
 import { Brand } from "./brand.model";
 import { Supplier } from "./supplier.model";
 import { Category } from "./category.model";
 import { ProductCategory } from "./product-category.model";
+import { ProductModel } from "./product-model.model";
 
 @Table
 export class Product extends Model<Product> {
@@ -62,4 +64,7 @@ export class Product extends Model<Product> {
 
   @BelongsToMany(() => Category, () => ProductCategory)
   categories: Category[];
+
+  @HasMany(() => ProductModel)
+  models: ProductModel[];
 }

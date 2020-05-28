@@ -6,23 +6,16 @@ import { DatabaseConnection } from "../../../database.connection";
 import { WarehouseStatus } from "../../../models/warehouse/warehouse-status.model";
 import { ItemStatuses } from "../../../models/warehouse/item-status.model";
 import { logger } from "../../../common/logger";
-
-/*
 import { Product } from "../../../models/warehouse/product.model";
-import { AddnewProductEnQueueMessage } from "../aws/sns/addnew-product-enqueue.message";
-import { NewProductMessageAttrs } from "../aws/sns/dtos/newproduct-message-attributes.dto";
-import { MessageMetaData } from "../../../common/models/metadata-message-attributes.model";
-import { UpdateProductMessageAttrs } from "../aws/sns/dtos/updateproduct-message-attributes.dto";
-import { IEnqueueMessage } from "../../../common/aws/sns/EnqueueMessage";
-import { UpdateProductEnQueueMessage } from "../aws/sns/update-product-store-enqueue.message";
 import { ProductModel } from "../../../models/warehouse/product-model.model";
-*/
 
 export class ProductInstanceService implements ModelServiceAbstract {
   private readonly productInstanceRepository: Repository<ProductInstance>;
   private readonly itemStatusesRepository: Repository<ItemStatuses>;
   private readonly warehouseStatusesRepository: Repository<WarehouseStatus>;
-  // private readonly productRepository: Repository<Product>;
+  private readonly productRepository: Repository<Product>;
+  private readonly productModelRepository: Repository<ProductModel>;
+
   private readonly db: DatabaseConnection;
   private readonly logMessage: string = "ProductInstanceService :: ";
   private readonly sequelize: Sequelize;
@@ -37,7 +30,8 @@ export class ProductInstanceService implements ModelServiceAbstract {
     this.warehouseStatusesRepository = this.sequelize.getRepository(
       WarehouseStatus
     );
-    // this.productRepository = this.sequelize.getRepository(Product);
+    this.productRepository = this.sequelize.getRepository(Product);
+    this.productModelRepository = this.sequelize.getRepository(ProductModel);
   }
   public async addNew(modelDto: {
     productModelId: string;
@@ -136,19 +130,20 @@ export class ProductInstanceService implements ModelServiceAbstract {
     return result;
   }
 
-  /*
-  private async publishProductChanges(
-    productModelId: string,
-    status: string,
-    qty: number
+  //
+
+  public async publishProductChanges(
+    productId: string,
+    status: string
   ): Promise<boolean> {
     let resultTran: boolean = false;
 
     try {
-      let enqueueMessage: IEnqueueMessage;
+      
 
-      const product: ProductModel = await this.productRepository.findOne({
-        where: { id: productModelId },
+      const product: Product = await this.productRepository.findOne({
+        where: { id: productId },
+        include: [this.productModelRepository],
       });
 
       logger.debug(
@@ -156,126 +151,24 @@ export class ProductInstanceService implements ModelServiceAbstract {
       );
 
       if (product) {
-        switch (status) {
-          case "STCK":
-            if (product.datePublished) {
-              const updateProductMessageAttr: UpdateProductMessageAttrs = {
-                ProductId: new MessageMetaData("String", product.id),
-                Operation: new MessageMetaData("String", status),
-                ProductStock: new MessageMetaData("Number", qty.toString()),
-              };
+        // update status
+        product.models.forEach(async (model) => {
+          const items: ProductInstance[] = await this.find({
+            where: {
+              productModelId: model.id,
+            },
+          });
 
-              logger.debug(
-                `${this.logMessage} publishProductChanges -> ${JSON.stringify(
-                  updateProductMessageAttr
-                )}`
-              );
-              enqueueMessage = new UpdateProductEnQueueMessage(
-                updateProductMessageAttr
-              );
-              if (await enqueueMessage.process()) {
-                await this.productRepository.update(
-                  {
-                    datePublished: new Date(),
-                  },
-                  {
-                    where: {
-                      id: productId,
-                    },
-                  }
-                );
-                resultTran = true;
-              }
-            } else {
-              const newProductMessageAttr: NewProductMessageAttrs = {
-                ProductId: new MessageMetaData("String", product.id),
-                ProductTitle: new MessageMetaData("String", product.title),
-                ProductDescription: new MessageMetaData(
-                  "String",
-                  product.description
-                ),
-                ProductDatePublished: new MessageMetaData(
-                  "String",
-                  new Date().toDateString()
-                ),
-                ProductStock: new MessageMetaData("Number", qty.toString()),
-              };
+          const result = await this.setStatus(
+            items.map((t) => t.serialNumber),
+            model.id,
+            status
+          );
+        });
 
-              logger.debug(
-                `${this.logMessage} publishProductChanges -> ${JSON.stringify(
-                  newProductMessageAttr
-                )}`
-              );
+        // call event
 
-              enqueueMessage = new AddnewProductEnQueueMessage(
-                newProductMessageAttr
-              );
-
-              if (await enqueueMessage.process()) {
-                const result = await this.productRepository.update(
-                  {
-                    datePublished: new Date(),
-                  },
-                  {
-                    where: {
-                      id: productId,
-                    },
-                  }
-                );
-
-                logger.debug(
-                  `${this.logMessage} publishProductChanges -> ${JSON.stringify(
-                    result
-                  )}`
-                );
-
-                resultTran = true;
-              }
-            }
-
-            break;
-          case "SOLD":
-            const updateProductMessageAttr: UpdateProductMessageAttrs = {
-              ProductId: new MessageMetaData("String", product.id),
-              Operation: new MessageMetaData("String", status),
-              ProductStock: new MessageMetaData("Number", qty.toString()),
-            };
-
-            logger.debug(
-              `${this.logMessage} publishProductChanges -> ${JSON.stringify(
-                updateProductMessageAttr
-              )}`
-            );
-            enqueueMessage = new UpdateProductEnQueueMessage(
-              updateProductMessageAttr
-            );
-            if (await enqueueMessage.process()) {
-              const result = await this.productRepository.update(
-                {
-                  datePublished: new Date(),
-                },
-                {
-                  where: {
-                    id: productId,
-                  },
-                }
-              );
-
-              logger.debug(
-                `${this.logMessage} publishProductChanges -> ${JSON.stringify(
-                  result
-                )}`
-              );
-              resultTran = true;
-            }
-
-            break;
-          default:
-            logger.debug(
-              `${this.logMessage} publishProductChanges -> Debug status > ${status}`
-            );
-            break;
-        }
+       
       }
     } catch (err) {
       logger.error(`${this.logMessage} publishProductChanges -> ${err}`);
@@ -283,6 +176,4 @@ export class ProductInstanceService implements ModelServiceAbstract {
       return resultTran;
     }
   }
-
-  */
 }
