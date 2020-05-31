@@ -1,3 +1,3 @@
-export interface PublishBase {
-  publish(criteria: any): Promise<boolean>;
+export interface PublishEvent {
+  publish(): Promise<boolean>;
 }

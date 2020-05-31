@@ -160,13 +160,12 @@ export class ProductController {
   @PreProcessor(ProductValidatorMiddleware.vaidateProductId)
   public async validateProductItemInStorage(
     @PathParam("productId") productId: string,
-    serialNumbers: Array<string>
+    produtModelIds: Array<string>
   ) {
     const status: string = "VLDN"; // mean validation product
 
     const result = await this.productInstanceService.setStatus(
-      serialNumbers,
-      productId,
+      produtModelIds,
       status
     );
 
@@ -189,17 +188,17 @@ export class ProductController {
   @PreProcessor(ProductValidatorMiddleware.vaidateProductId)
   public async sendToStock(
     @PathParam("productId") productId: string,
-    serialNumbers: Array<string>
+    produtModelIds: Array<string>
   ) {
     const status: string = "STCK"; // mean stock
 
-    const result = await this.productInstanceService.setStatus(
-      serialNumbers,
+    const result = await this.productInstanceService.publishProductChanges(
       productId,
+      produtModelIds,
       status
     );
 
-    if (result < 0) {
+    if (!result) {
       throw new InternalServerError(
         "An error has occuerred while trying to set a Status to Product Items"
       );

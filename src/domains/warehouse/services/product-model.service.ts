@@ -110,8 +110,7 @@ export class ProductModelService implements ModelServiceAbstract {
 
             if (itemSaved) {
               await this.productInstanceService.setStatus(
-                [itemSaved.serialNumber],
-                productModelId,
+                [productModelId],
                 "STRG"
               );
             }
@@ -131,6 +130,7 @@ export class ProductModelService implements ModelServiceAbstract {
       where: {
         id: id,
       },
+      include: [this.priceHistoryRepository, this.specRepository],
     });
   }
   public async findAll(): Promise<any> {

@@ -29,6 +29,9 @@ export class ProductModel extends Model<ProductModel> {
   @Column
   costPrice: number;
 
+  @Column
+  datePublished: Date;
+
   @CreatedAt
   creationDate: Date;
 

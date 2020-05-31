@@ -6,15 +6,23 @@ import { DatabaseConnection } from "../../../database.connection";
 import { WarehouseStatus } from "../../../models/warehouse/warehouse-status.model";
 import { ItemStatuses } from "../../../models/warehouse/item-status.model";
 import { logger } from "../../../common/logger";
-import { Product } from "../../../models/warehouse/product.model";
+import { Inject } from "typescript-ioc";
+import { ProductService } from "./product.service";
+import { ProductModelService } from "./product-model.service";
 import { ProductModel } from "../../../models/warehouse/product-model.model";
+import { PublishEvent } from "../events/base-publish.event";
+import { Product } from "../../../models/warehouse/product.model";
+import { ProductOnlinestoreSendStockEvent } from "../events/product-onlinestore-sentstock.event";
+import { ProductOnlineStoreUpdateEvent } from "../events/product-onlinestore-update.event";
 
 export class ProductInstanceService implements ModelServiceAbstract {
+  @Inject productService: ProductService;
+  @Inject productModelService: ProductModelService;
+  @Inject publishEvents: Array<PublishEvent>;
+
   private readonly productInstanceRepository: Repository<ProductInstance>;
   private readonly itemStatusesRepository: Repository<ItemStatuses>;
   private readonly warehouseStatusesRepository: Repository<WarehouseStatus>;
-  private readonly productRepository: Repository<Product>;
-  private readonly productModelRepository: Repository<ProductModel>;
 
   private readonly db: DatabaseConnection;
   private readonly logMessage: string = "ProductInstanceService :: ";
@@ -30,8 +38,6 @@ export class ProductInstanceService implements ModelServiceAbstract {
     this.warehouseStatusesRepository = this.sequelize.getRepository(
       WarehouseStatus
     );
-    this.productRepository = this.sequelize.getRepository(Product);
-    this.productModelRepository = this.sequelize.getRepository(ProductModel);
   }
   public async addNew(modelDto: {
     productModelId: string;
@@ -59,23 +65,12 @@ export class ProductInstanceService implements ModelServiceAbstract {
   }
 
   public async setStatus(
-    serialNumbers: Array<string>,
-    productModelId: string,
+    productModelIds: Array<string>,
     statusCode: string
   ): Promise<number> {
+    // set result transacion to 0 as err message
     let result: number = 0;
     try {
-      const items: Array<ProductInstance> = await this.productInstanceRepository.findAll(
-        {
-          where: {
-            serialNumber: serialNumbers,
-            productModelId,
-          },
-        }
-      );
-
-      logger.debug(`${this.logMessage} setStatus -> ${items}`);
-
       const status: WarehouseStatus = await this.warehouseStatusesRepository.findOne(
         {
           where: {
@@ -85,11 +80,34 @@ export class ProductInstanceService implements ModelServiceAbstract {
       );
 
       logger.debug(`${this.logMessage} setStatus -> ${status}`);
-      items.forEach(async (item) => {
-        result += 1;
-        await this.itemStatusesRepository.create({
-          warehouseStatusId: status.id,
-          productInstanceId: item.id,
+
+      productModelIds.forEach(async (model) => {
+        logger.debug(`${this.logMessage} setStatus -> ${model}`);
+
+        const productModel: ProductModel = await this.productModelService.findById(
+          model
+        );
+
+        productModel.items.forEach(async (item) => {
+          // find all items as same status, and exept that
+          const productInstance: ProductInstance = await this.find({
+            where: {
+              id: item.id,
+            },
+            includes: [this.itemStatusesRepository],
+          });
+
+          if (
+            !productInstance.itemStatus
+              .map((t) => t.initials)
+              .includes(statusCode)
+          ) {
+            result += 1;
+            await this.itemStatusesRepository.create({
+              warehouseStatusId: status.id,
+              productInstanceId: item.id,
+            });
+          }
         });
       });
 
@@ -134,45 +152,65 @@ export class ProductInstanceService implements ModelServiceAbstract {
 
   public async publishProductChanges(
     productId: string,
+    produtModelIds: Array<string>,
     status: string
   ): Promise<boolean> {
     let resultTran: boolean = false;
+    let isNewProductToStock: boolean = false;
+    let newProductModelsToStock: Array<ProductModel>;
+    let newItemsInventoryToStock: Map<string, number>;
 
     try {
-      
+      // update status
 
-      const product: Product = await this.productRepository.findOne({
-        where: { id: productId },
-        include: [this.productModelRepository],
-      });
+      const product: Product = await this.productService.findById(productId);
+      if (!product.datePublished) isNewProductToStock = true;
 
-      logger.debug(
-        `${this.logMessage} publishProductChanges -> ${JSON.stringify(product)}`
-      );
+      produtModelIds.forEach(async (model) => {
+        // find productModelId
+        const productModel: ProductModel = await this.productModelService.findById(
+          model
+        );
 
-      if (product) {
-        // update status
-        product.models.forEach(async (model) => {
-          const items: ProductInstance[] = await this.find({
-            where: {
-              productModelId: model.id,
-            },
-          });
+        if (!productModel.datePublished) {
+          newProductModelsToStock.push(productModel);
 
-          const result = await this.setStatus(
-            items.map((t) => t.serialNumber),
-            model.id,
-            status
+          const result = await this.setStatus([model], status);
+
+          logger.info(
+            `${this.logMessage} publishProductChanges -> ${result} Items added, productModel: ${model}`
           );
-        });
+        } else {
+          const itemsAffected: number = await this.setStatus([model], status);
+          newItemsInventoryToStock.set(model, itemsAffected);
 
-        // call event
-
-       
-      }
+          logger.info(
+            `${this.logMessage} publishProductChanges -> ${JSON.stringify(
+              newItemsInventoryToStock
+            )} Items added, productModel: ${model}`
+          );
+        }
+      });
+      resultTran = true;
     } catch (err) {
       logger.error(`${this.logMessage} publishProductChanges -> ${err}`);
     } finally {
+      if (resultTran) {
+        // call events
+        this.publishEvents = [
+          new ProductOnlinestoreSendStockEvent(
+            productId,
+            isNewProductToStock,
+            newProductModelsToStock
+          ),
+          new ProductOnlineStoreUpdateEvent(newItemsInventoryToStock),
+        ];
+
+        this.publishEvents.forEach(async (element) => {
+          await element.publish();
+        });
+      }
+
       return resultTran;
     }
   }
