@@ -4,7 +4,6 @@ import { IEnqueueMessage } from "../../../common/aws/sns/EnqueueMessage";
 import { Product } from "../../../models/warehouse/product.model";
 import { Inject } from "typescript-ioc";
 import { ProductService } from "../services/product.service";
-import { UpdateProductEnQueueMessage } from "../aws/sns/update-product-store-enqueue.message";
 import { MessageMetaData } from "../../../common/models/metadata-message-attributes.model";
 import { NewProductMessageAttrs } from "../aws/sns/dtos/newproduct-message-attributes.dto";
 import { AddnewProductEnQueueMessage } from "../aws/sns/addnew-product-enqueue.message";
