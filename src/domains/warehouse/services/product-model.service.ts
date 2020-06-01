@@ -139,7 +139,12 @@ export class ProductModelService implements ModelServiceAbstract {
     logger.debug(`${logMessage} ${JSON.stringify(result)}`);
     return result;
   }
-  update<T>(id: T, model: any): Promise<any> {
-    throw new Error("Method not implemented.");
+  public async update<T>(id: T, criteria: any): Promise<any> {
+    const result = await this.productModelRepository.update(
+      criteria.values,
+      criteria.options
+    );
+
+    return result;
   }
 }

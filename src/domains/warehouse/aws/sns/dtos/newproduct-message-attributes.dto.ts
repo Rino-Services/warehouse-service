@@ -5,5 +5,4 @@ export class NewProductMessageAttrs {
   ProductTitle: MessageMetaData;
   ProductDescription: MessageMetaData;
   ProductDatePublished: MessageMetaData;
-  ProductStock: MessageMetaData;
 }

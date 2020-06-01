@@ -203,7 +203,7 @@ export class ProductInstanceService implements ModelServiceAbstract {
             isNewProductToStock,
             newProductModelsToStock
           ),
-          new ProductOnlineStoreUpdateEvent(newItemsInventoryToStock),
+          new ProductOnlineStoreUpdateEvent(newItemsInventoryToStock, status),
         ];
 
         this.publishEvents.forEach(async (element) => {

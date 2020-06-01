@@ -1,7 +1,7 @@
 import { MessageMetaData } from "../../../../../common/models/metadata-message-attributes.model";
 
-export class UpdateProductMessageAttrs {
-  ProductId: MessageMetaData;
+export class UpdateProductInventoryMessageAttrs {  
+  ProductModelId: MessageMetaData;
   Operation: MessageMetaData;
-  ProductStock: MessageMetaData;
+  Qty: MessageMetaData;
 }

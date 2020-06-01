@@ -11,3 +11,12 @@ export class AutoSalesWarehouseServiceAddnewProductStore {
   public static readonly topicArn =
     "arn:aws:sns:us-west-2:615953265037:autosales-warehouse-service-addnew-product-store";
 }
+
+export class AutoSalesWarehouseServiceAddnewProductModelStore {
+  public static readonly subject = "Add new Product-Model to Store";
+  public static readonly message = "Add new Product-Model to Store - MessageBody";
+  public static readonly topicArn =
+    "arn:aws:sns:us-west-2:615953265037:autosales-warehouse-service-addnew-product-store";
+}
+
+
