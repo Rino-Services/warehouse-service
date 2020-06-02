@@ -28,7 +28,10 @@ export class PriceHistoryService implements ModelServiceAbstract {
       // is the firstOne? (is firstone when result set comes null/empty),
       if (!currentPrice) {
         const result = await this.priceHistoryRepository.create({
-          price: this.setNewPrice(0, priceHistoryDto.oldPrice), // price: set as default price
+          price: this.setNewPrice(
+            priceHistoryDto.percentageApplied,
+            priceHistoryDto.price
+          ), // price: set as default price
           percentageApplied: priceHistoryDto.percentageApplied, // percentageApplied: 0
           oldPrice: priceHistoryDto.oldPrice, // oldPrice: costPrice
           isCurrent: true, // isCurrent: true

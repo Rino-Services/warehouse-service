@@ -65,7 +65,7 @@ export class ProductController {
   @GET
   @Path("/all-product-models/:productId")
   @PreProcessor(ProductValidatorMiddleware.vaidateProductId)
-  public async getAllProductModelByProduct0(
+  public async getAllProductModelByProduct(
     @PathParam("productId") productId: string
   ) {
     return await this.productModelService.getAllByProductId(productId);
@@ -153,7 +153,7 @@ export class ProductController {
   /**
    *
    * @param productId uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
-   * @param serialNumbers serials numbers put in array, sample ["9000000000100", "9000000000200","9000000000300"]
+   * @param produtModelIds product-model ids, as UUID in array, sample ["adf36720-8c4a-11ea-88c5-d12b469dd160", "f39fcc00-a4a0-11ea-80a4-dfdd76f0572a"]
    */
   @PUT
   @Path("/:productId/validateProductItemInStorage")
@@ -164,10 +164,12 @@ export class ProductController {
   ) {
     const status: string = "VLDN"; // mean validation product
 
-    const result = await this.productInstanceService.setStatus(
-      produtModelIds,
-      status
+    const items = await this.productModelService.getAllItemsFromModelsArray(
+      productId,
+      produtModelIds
     );
+
+    const result = await this.productInstanceService.setStatus(items, status);
 
     if (result < 0) {
       throw new InternalServerError(
@@ -181,7 +183,7 @@ export class ProductController {
   /**
    *
    * @param productId uuid, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
-   * @param serialNumbers serials numbers put in array, sample ["9000000000100", "9000000000200","9000000000300"]
+   * @param produtModelIds product-model ids, as UUID in array, sample ["adf36720-8c4a-11ea-88c5-d12b469dd160", "f39fcc00-a4a0-11ea-80a4-dfdd76f0572a"]
    */
   @PUT
   @Path("/:productId/sendToStock")

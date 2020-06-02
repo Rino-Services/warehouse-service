@@ -17,11 +17,12 @@ export class ProductModelService implements ModelServiceAbstract {
   @Inject priceHistoryService: PriceHistoryService;
   @Inject productInstanceService: ProductInstanceService;
 
-  private productModelRepository: Repository<ProductModel>;
   private db: DatabaseConnection;
 
+  private productModelRepository: Repository<ProductModel>;
   private priceHistoryRepository: Repository<PriceHistory>;
-  private readonly specRepository: Repository<Spec>;
+  private specRepository: Repository<Spec>;
+  private productInstanceRepository: Repository<ProductInstance>;
 
   private readonly logScopeMessage: string = "ProductModelService :: ";
 
@@ -31,6 +32,7 @@ export class ProductModelService implements ModelServiceAbstract {
     this.productModelRepository = sequelize.getRepository(ProductModel);
     this.priceHistoryRepository = sequelize.getRepository(PriceHistory);
     this.specRepository = sequelize.getRepository(Spec);
+    this.productInstanceRepository = sequelize.getRepository(ProductInstance);
   }
 
   public async addNew(model: {
@@ -52,7 +54,7 @@ export class ProductModelService implements ModelServiceAbstract {
       // add unit price -> to priceHistory
       if (result) {
         const priceHistoryDto: PriceHistoryDto = {
-          price: 0,
+          price: model.dto.costPrice,
           percentageApplied: model.dto.percentageApplied,
           oldPrice: model.dto.costPrice,
           productModelId: result.id,
@@ -76,7 +78,11 @@ export class ProductModelService implements ModelServiceAbstract {
       where: {
         productId: productId,
       },
-      include: [this.priceHistoryRepository, this.specRepository],
+      include: [
+        this.priceHistoryRepository,
+        this.specRepository,
+        this.productInstanceRepository,
+      ],
     });
 
     logger.debug(`${result}`);
@@ -87,13 +93,14 @@ export class ProductModelService implements ModelServiceAbstract {
     productModelId: string,
     itemsToAdd: Array<string>
   ): Promise<boolean> {
-    const logMessage: string = `${this.logScopeMessage} -> `;
+    const logMessage: string = `${this.logScopeMessage} -> addNewProductsItems -> `;
 
     try {
       const product = await this.productModelRepository.findOne({
         where: { id: productModelId },
       });
       if (product) {
+        // let itemsSaved: Array<ProductInstance> = [];
         itemsToAdd.forEach(async (item) => {
           // validate that serial number does not exist
           if (
@@ -108,11 +115,12 @@ export class ProductModelService implements ModelServiceAbstract {
               }
             );
 
+            logger.debug(
+              `${logMessage} itemSaved -> ${JSON.stringify(itemSaved)}`
+            );
+
             if (itemSaved) {
-              await this.productInstanceService.setStatus(
-                [productModelId],
-                "STRG"
-              );
+              await this.productInstanceService.setStatus([itemSaved], "STRG");
             }
           }
         });
@@ -125,26 +133,72 @@ export class ProductModelService implements ModelServiceAbstract {
     }
   }
 
-  public async findById<T>(id: T): Promise<any> {
-    return await this.productModelRepository.findOne({
-      where: {
-        id: id,
-      },
-      include: [this.priceHistoryRepository, this.specRepository],
-    });
+  public async find(id: string): Promise<ProductModel> {
+    try {
+      const result = await this.productModelRepository.findOne({
+        where: {
+          id: id,
+        },
+        include: [
+          this.priceHistoryRepository,
+          this.specRepository,
+          this.productInstanceRepository,
+        ],
+      });
+      logger.debug(
+        `${this.logScopeMessage} :: findById ${JSON.stringify(result)}`
+      );
+      return result;
+    } catch (err) {
+      logger.error(`${this.logScopeMessage} findById ${JSON.stringify(err)}`);
+      return new ProductModel();
+    }
   }
+
+  public async findById<T>(id: T): Promise<any> {
+    throw new Error("Method not implemented.");
+  }
+
   public async findAll(): Promise<any> {
     const logMessage: string = `${this.logScopeMessage} findAll ->`;
     const result = await this.productModelRepository.findAll();
     logger.debug(`${logMessage} ${JSON.stringify(result)}`);
     return result;
   }
+
   public async update<T>(id: T, criteria: any): Promise<any> {
-    const result = await this.productModelRepository.update(
-      criteria.values,
-      criteria.options
+    throw new Error("Method not implemented.");
+
+    // const result = await this.productModelRepository.update(
+    //   criteria.values,
+    //   criteria.options
+    // );
+
+    // return result;
+  }
+
+  public async getAllItemsFromModelsArray(
+    productId: string,
+    productModelIds: Array<string>
+  ): Promise<Array<ProductInstance>> {
+    let items: Array<ProductInstance> = [];
+
+    const produtModelArray: Array<ProductModel> = await this.productModelRepository.findAll(
+      {
+        where: {
+          id: productModelIds,
+          productId: productId,
+        },
+        include: [this.productInstanceRepository],
+      }
     );
 
-    return result;
+    produtModelArray.forEach((model) => {
+      model.items.forEach((item) => {
+        items.push(item);
+      });
+    });
+
+    return items;
   }
 }

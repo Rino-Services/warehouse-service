@@ -1,4 +1,4 @@
-import { Path, PathParam, POST, FileParam } from "typescript-rest";
+import { Path, PathParam, POST, FileParam, GET } from "typescript-rest";
 import { Tags } from "typescript-rest-swagger";
 import { Inject } from "typescript-ioc";
 import { ProductModelService } from "../services/product-model.service";
@@ -15,6 +15,16 @@ export class ProductModelController {
   @Inject specService: SpecService;
   @Inject
   private productModelRequestValidatorMiddleware: ProductModelRequestValidatorMiddleware;
+
+  /**
+   *
+   * @param id uuid Id, sample: adf36720-8c4a-11ea-88c5-d12b469dd160
+   */
+  @GET
+  @Path("/:productModelId")
+  public async findById(@PathParam("productModelId") productModelId: string) {
+    return await this.productModelService.find(productModelId);
+  }
 
   /**
    *
@@ -70,7 +80,7 @@ export class ProductModelController {
    * @param itemsToAdd model thats contains items to add
    */
   @POST
-  @Path("/:productModelId/addProductItems")
+  @Path("add-product-items/:productModelId")
   public async addProductItems(
     @PathParam("productModelId") productModelId: string,
     itemsToAdd: Array<string>

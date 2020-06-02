@@ -17,8 +17,8 @@ import { ProductOnlineStoreUpdateEvent } from "../events/product-onlinestore-upd
 
 export class ProductInstanceService implements ModelServiceAbstract {
   @Inject productService: ProductService;
-  @Inject productModelService: ProductModelService;
-  @Inject publishEvents: Array<PublishEvent>;
+  private productModelService: ProductModelService;
+  private publishEvents: Array<PublishEvent>;
 
   private readonly productInstanceRepository: Repository<ProductInstance>;
   private readonly itemStatusesRepository: Repository<ItemStatuses>;
@@ -38,6 +38,9 @@ export class ProductInstanceService implements ModelServiceAbstract {
     this.warehouseStatusesRepository = this.sequelize.getRepository(
       WarehouseStatus
     );
+
+    // services
+    this.productModelService = new ProductModelService();
   }
   public async addNew(modelDto: {
     productModelId: string;
@@ -65,7 +68,7 @@ export class ProductInstanceService implements ModelServiceAbstract {
   }
 
   public async setStatus(
-    productModelIds: Array<string>,
+    itemsSaved: Array<ProductInstance>,
     statusCode: string
   ): Promise<number> {
     // set result transacion to 0 as err message
@@ -79,24 +82,23 @@ export class ProductInstanceService implements ModelServiceAbstract {
         }
       );
 
-      logger.debug(`${this.logMessage} setStatus -> ${status}`);
+      logger.debug(`${this.logMessage} setStatus -> ${JSON.stringify(status)}`);
 
-      productModelIds.forEach(async (model) => {
-        logger.debug(`${this.logMessage} setStatus -> ${model}`);
-
-        const productModel: ProductModel = await this.productModelService.findById(
-          model
+      itemsSaved.forEach(async (item) => {
+        // find all items as same status, and exept that
+        const productInstance: ProductInstance = await this.find({
+          where: {
+            id: item.id,
+          },
+          include: [this.warehouseStatusesRepository],
+        });
+        logger.debug(
+          `${this.logMessage} setStatus -> ProductInstance -> ${JSON.stringify(
+            productInstance
+          )}`
         );
 
-        productModel.items.forEach(async (item) => {
-          // find all items as same status, and exept that
-          const productInstance: ProductInstance = await this.find({
-            where: {
-              id: item.id,
-            },
-            includes: [this.itemStatusesRepository],
-          });
-
+        if (productInstance.itemStatus.length > 0) {
           if (
             !productInstance.itemStatus
               .map((t) => t.initials)
@@ -108,7 +110,13 @@ export class ProductInstanceService implements ModelServiceAbstract {
               productInstanceId: item.id,
             });
           }
-        });
+        } else {
+          result += 1;
+          await this.itemStatusesRepository.create({
+            warehouseStatusId: status.id,
+            productInstanceId: item.id,
+          });
+        }
       });
 
       logger.info(`${this.logMessage} setStatus -> ${result} result added`);
@@ -175,13 +183,16 @@ export class ProductInstanceService implements ModelServiceAbstract {
         if (!productModel.datePublished) {
           newProductModelsToStock.push(productModel);
 
-          const result = await this.setStatus([model], status);
+          const result = await this.setStatus(productModel.items, status);
 
           logger.info(
             `${this.logMessage} publishProductChanges -> ${result} Items added, productModel: ${model}`
           );
         } else {
-          const itemsAffected: number = await this.setStatus([model], status);
+          const itemsAffected: number = await this.setStatus(
+            productModel.items,
+            status
+          );
           newItemsInventoryToStock.set(model, itemsAffected);
 
           logger.info(

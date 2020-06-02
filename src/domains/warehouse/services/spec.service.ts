@@ -33,9 +33,7 @@ export class SpecService implements ModelServiceAbstract {
     let result = false;
     try {
       // find productModel
-      const productModel = await this.productModelService.findById(
-        productModelId
-      );
+      const productModel = await this.productModelService.find(productModelId);
 
       if (productModel) {
         specs.forEach(async (spec) => {
