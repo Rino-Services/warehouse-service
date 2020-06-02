@@ -52,7 +52,13 @@ export class ProductService implements ModelServiceAbstract {
     return result;
   }
 
-  public async update<String>(id: String, criteria: any): Promise<any> {
+  public async update<String>(
+    id: String,
+    criteria: {
+      values: any;
+      options: any;
+    }
+  ): Promise<any> {
     return await this.productRepository.update(
       criteria.values,
       criteria.options

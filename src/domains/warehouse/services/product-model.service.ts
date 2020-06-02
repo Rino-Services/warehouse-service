@@ -166,15 +166,19 @@ export class ProductModelService implements ModelServiceAbstract {
     return result;
   }
 
-  public async update<T>(id: T, criteria: any): Promise<any> {
-    throw new Error("Method not implemented.");
+  public async update<T>(
+    id: T,
+    criteria: {
+      values: any;
+      options: any;
+    }
+  ): Promise<any> {
+    const result = await this.productModelRepository.update(
+      criteria.values,
+      criteria.options
+    );
 
-    // const result = await this.productModelRepository.update(
-    //   criteria.values,
-    //   criteria.options
-    // );
-
-    // return result;
+    return result;
   }
 
   public async getAllItemsFromModelsArray(

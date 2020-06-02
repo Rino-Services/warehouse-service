@@ -165,8 +165,8 @@ export class ProductInstanceService implements ModelServiceAbstract {
   ): Promise<boolean> {
     let resultTran: boolean = false;
     let isNewProductToStock: boolean = false;
-    let newProductModelsToStock: Array<ProductModel>;
-    let newItemsInventoryToStock: Map<string, number>;
+    let newProductModelsToStock: Array<ProductModel> = [];
+    let newItemsInventoryToStock: Map<string, number> = new Map();
 
     try {
       // update status
@@ -176,7 +176,7 @@ export class ProductInstanceService implements ModelServiceAbstract {
 
       produtModelIds.forEach(async (model) => {
         // find productModelId
-        const productModel: ProductModel = await this.productModelService.findById(
+        const productModel: ProductModel = await this.productModelService.find(
           model
         );
 

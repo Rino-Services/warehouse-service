@@ -2,7 +2,6 @@ import { PublishEvent } from "./base-publish.event";
 import { logger } from "../../../common/logger";
 import { IEnqueueMessage } from "../../../common/aws/sns/EnqueueMessage";
 import { Product } from "../../../models/warehouse/product.model";
-import { Inject } from "typescript-ioc";
 import { ProductService } from "../services/product.service";
 import { MessageMetaData } from "../../../common/models/metadata-message-attributes.model";
 import { NewProductMessageAttrs } from "../aws/sns/dtos/newproduct-message-attributes.dto";
@@ -13,8 +12,8 @@ import { AddnewProductModelEnQueueMessage } from "../aws/sns/addnew-productmodel
 import { ProductModelService } from "../services/product-model.service";
 
 export class ProductOnlinestoreSendStockEvent implements PublishEvent {
-  @Inject productService: ProductService;
-  @Inject productModelService: ProductModelService;
+  private productService: ProductService;
+  private productModelService: ProductModelService;
 
   private readonly logMessage: any;
   private enqueueMessage: IEnqueueMessage;
@@ -23,7 +22,10 @@ export class ProductOnlinestoreSendStockEvent implements PublishEvent {
     private productId: string,
     private isNewProductToStock: boolean,
     private newProductModelsToStock: Array<ProductModel>
-  ) {}
+  ) {
+    this.productService = new ProductService();
+    this.productModelService = new ProductModelService();
+  }
 
   public async publish(): Promise<boolean> {
     let resultTran: boolean = false;
@@ -60,16 +62,18 @@ export class ProductOnlinestoreSendStockEvent implements PublishEvent {
       );
 
       if (await this.enqueueMessage.process()) {
-        const result = await this.productService.update(
-          {
+        let criteria: any = {
+          values: {
             datePublished: new Date(),
           },
-          {
+          options: {
             where: {
               id: this.productId,
             },
-          }
-        );
+          },
+        };
+
+        const result = await this.productService.update(null, criteria);
 
         logger.debug(
           `${this.logMessage} publishProductChanges -> ${JSON.stringify(
@@ -134,15 +138,21 @@ export class ProductOnlinestoreSendStockEvent implements PublishEvent {
 
         if (await this.enqueueMessage.process()) {
           // update publish date of ProductModel
-          const productModelUpdateResult = await this.productModelService.update(
-            {
+
+          let criteria: any = {
+            values: {
               datePublished: new Date(),
             },
-            {
+            options: {
               where: {
                 id: model.id,
               },
-            }
+            },
+          };
+
+          const productModelUpdateResult = await this.productModelService.update(
+            null,
+            criteria
           );
           logger.debug(
             `${this.logMessage} publishProductChanges -> ${JSON.stringify(
